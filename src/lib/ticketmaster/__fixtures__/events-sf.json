@@ -1,0 +1,253 @@
+{
+  "_embedded": {
+    "events": [
+      {
+        "id": "G5vYZ_A5NTXU-",
+        "name": "gnash",
+        "url": "https://www.ticketmaster.com/gnash-san-francisco-california-10-21-2026/event/1C006452E3FFEDA1",
+        "test": false,
+        "dates": {
+          "start": {
+            "localDate": "2026-10-21",
+            "localTime": "20:00:00",
+            "dateTime": "2026-10-22T03:00:00Z",
+            "dateTBD": false,
+            "dateTBA": false,
+            "timeTBA": false,
+            "noSpecificTime": false
+          },
+          "timezone": "America/Los_Angeles",
+          "status": {
+            "code": "rescheduled"
+          }
+        },
+        "sales": {
+          "public": {
+            "startDateTime": "2026-02-27T18:00:00Z",
+            "startTBD": false,
+            "startTBA": false,
+            "endDateTime": "2026-10-22T05:00:00Z"
+          },
+          "presales": [
+            {
+              "startDateTime": "2026-02-23T17:01:00Z",
+              "endDateTime": "2026-02-27T06:00:00Z",
+              "name": "Artist Presale"
+            },
+            {
+              "startDateTime": "2026-02-24T17:00:00Z",
+              "endDateTime": "2026-02-27T06:00:00Z",
+              "name": "LIVE NATION PRESALE",
+              "description": "Live Nation Presales are available exclusively to Live Nation All Access members. It only takes a minute to join and membership is free. Sign into Ticketmaster with the same email address you use for All Access to automatically unlock the presale (no presale codes).",
+              "shortDescription": "Available exclusively to Live Nation All Access members",
+              "linkDescription": "Join for Free to Unlock Presale",
+              "url": "https://www.livenation.com/allaccess"
+            },
+            {
+              "startDateTime": "2026-02-24T17:00:00Z",
+              "endDateTime": "2026-02-27T06:00:00Z",
+              "name": "Venue Presale"
+            },
+            {
+              "startDateTime": "2026-02-25T18:00:00Z",
+              "endDateTime": "2026-02-27T06:00:00Z",
+              "name": "Spotify Presale"
+            },
+            {
+              "startDateTime": "2026-02-23T17:00:00Z",
+              "endDateTime": "2026-02-27T06:00:00Z",
+              "name": "Mastercard Presale"
+            },
+            {
+              "startDateTime": "2026-02-27T18:00:00Z",
+              "endDateTime": "2026-09-25T05:00:00Z",
+              "name": "Mastercard Preferred Tickets"
+            }
+          ]
+        },
+        "_embedded": {
+          "venues": [
+            {
+              "id": "KovZ917ANZn",
+              "name": "Cafe Du Nord",
+              "timezone": "America/Los_Angeles",
+              "city": {
+                "name": "San Francisco"
+              },
+              "state": {
+                "name": "California",
+                "stateCode": "CA"
+              },
+              "country": {
+                "name": "United States Of America",
+                "countryCode": "US"
+              },
+              "location": {
+                "longitude": "-122.43029870",
+                "latitude": "37.76658580"
+              }
+            }
+          ],
+          "attractions": [
+            {
+              "id": "K8vZ917f5O0",
+              "name": "gnash",
+              "externalLinks": {
+                "spotify": [
+                  {
+                    "url": "https://open.spotify.com/artist/3iri9nBFs9e4wN7PLIetAw"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "G5vYZ_GFHHYVA",
+        "name": "Malcolm Todd: Do That Again Tour",
+        "url": "https://www.ticketmaster.com/malcolm-todd-do-that-again-tour-oakland-california-10-21-2026/event/1C0064C23CF30D05",
+        "test": false,
+        "dates": {
+          "start": {
+            "localDate": "2026-10-21",
+            "localTime": "20:00:00",
+            "dateTime": "2026-10-22T03:00:00Z",
+            "dateTBD": false,
+            "dateTBA": false,
+            "timeTBA": false,
+            "noSpecificTime": false
+          },
+          "timezone": "America/Los_Angeles",
+          "status": {
+            "code": "onsale"
+          }
+        },
+        "sales": {
+          "public": {
+            "startDateTime": "2026-06-11T17:00:00Z",
+            "startTBD": false,
+            "startTBA": false,
+            "endDateTime": "2026-10-22T04:20:00Z"
+          },
+          "presales": [
+            {
+              "startDateTime": "2026-06-09T17:00:00Z",
+              "endDateTime": "2026-06-11T05:00:00Z",
+              "name": "Artist Presale"
+            },
+            {
+              "startDateTime": "2026-06-10T17:00:00Z",
+              "endDateTime": "2026-06-11T05:00:00Z",
+              "name": "APE Presale"
+            },
+            {
+              "startDateTime": "2026-06-09T17:00:00Z",
+              "endDateTime": "2026-06-11T05:00:00Z",
+              "name": "VIP Packages Presale"
+            },
+            {
+              "startDateTime": "2026-06-11T17:00:00Z",
+              "endDateTime": "2026-10-17T19:00:00Z",
+              "name": "VIP Packages Onsale"
+            }
+          ]
+        },
+        "_embedded": {
+          "venues": [
+            {
+              "id": "KovZpaKoXe",
+              "name": "Fox Theater - Oakland",
+              "timezone": "America/Los_Angeles",
+              "city": {
+                "name": "Oakland"
+              },
+              "state": {
+                "name": "California",
+                "stateCode": "CA"
+              },
+              "country": {
+                "name": "United States Of America",
+                "countryCode": "US"
+              },
+              "location": {
+                "longitude": "-122.27005970",
+                "latitude": "37.80771760"
+              }
+            }
+          ],
+          "attractions": [
+            {
+              "id": "K8vZ917jb-V",
+              "name": "Malcolm Todd"
+            },
+            {
+              "id": "K8vZ917r4R0",
+              "name": "54 Ultra"
+            }
+          ]
+        }
+      },
+      {
+        "id": "rZ7HnEZ1Af-3aS",
+        "name": "WESLEY JOSEPH",
+        "url": "https://www.ticketweb.com/event/wesley-joseph-brick-and-mortar-music-hall-tickets/14852273",
+        "test": false,
+        "dates": {
+          "start": {
+            "localDate": "2026-10-22",
+            "localTime": "20:00:00",
+            "dateTime": "2026-10-23T03:00:00Z",
+            "dateTBD": false,
+            "dateTBA": false,
+            "timeTBA": false,
+            "noSpecificTime": false
+          },
+          "timezone": "America/Los_Angeles",
+          "status": {
+            "code": "cancelled"
+          }
+        },
+        "sales": {
+          "public": {
+            "startDateTime": "2026-04-17T17:00:00Z",
+            "startTBD": false,
+            "startTBA": false,
+            "endDateTime": "2026-10-23T05:30:00Z"
+          }
+        },
+        "_embedded": {
+          "venues": [
+            {
+              "id": "rZ7HnEZ17Fp1f",
+              "name": "Brick and Mortar Music Hall",
+              "timezone": "America/Los_Angeles",
+              "city": {
+                "name": "San Francisco"
+              },
+              "state": {
+                "name": "California",
+                "stateCode": "CA"
+              },
+              "country": {
+                "name": "United States Of America",
+                "countryCode": "US"
+              },
+              "location": {
+                "longitude": "-122.420282",
+                "latitude": "37.769739"
+              }
+            }
+          ],
+          "attractions": []
+        }
+      }
+    ]
+  },
+  "page": {
+    "size": 3,
+    "totalElements": 3,
+    "totalPages": 1,
+    "number": 0
+  }
+}

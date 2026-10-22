@@ -1,0 +1,30 @@
+{
+  "_embedded": {
+    "attractions": [
+      {
+        "id": "K8vZ917jsH7",
+        "name": "Taylorville - A Tribute to Taylor Swift"
+      },
+      {
+        "id": "K8vZ917rJ40",
+        "name": "Lover - A tribute to Taylor Swift"
+      },
+      {
+        "id": "K8vZ917qSVf",
+        "name": "TAYLOR: A Tribute to the Eras of Taylor Swift"
+      },
+      {
+        "id": "K8vZ917hrXV",
+        "name": "Let\u2019s Sing Taylor - A Live Band Experience Celebrating Taylor Swift"
+      },
+      {
+        "id": "K8vZ917qk_V",
+        "name": "Miss Americana - A Tribute to Taylor Swift"
+      },
+      {
+        "id": "K8vZ917rYVf",
+        "name": "Taylor Swift Tribute - LOVER by Charity Eden"
+      }
+    ]
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "_embedded": {
+    "attractions": [
+      {
+        "id": "K8vZ917f5O0",
+        "name": "gnash",
+        "externalLinks": {
+          "spotify": [
+            {
+              "url": "https://open.spotify.com/artist/3iri9nBFs9e4wN7PLIetAw"
+            }
+          ]
+        }
+      },
+      {
+        "id": "K8vZ9179kB7",
+        "name": "Gnash"
+      },
+      {
+        "id": "ZkDnngzZDdk0ukQuXuaaFOewKzq-nZt",
+        "name": "gnash"
+      },
+      {
+        "id": "K8vZ917fLT7",
+        "name": "G-Nash"
+      }
+    ]
+  }
+}

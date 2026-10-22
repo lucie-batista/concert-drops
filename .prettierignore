@@ -4,3 +4,4 @@ build
 coverage
 package-lock.json
 next-env.d.ts
+supabase/.temp
