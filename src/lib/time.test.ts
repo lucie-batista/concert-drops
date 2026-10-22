@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { formatInTimeZone, formatShowDate, tileParts, zoneLabel } from "./time";
+import {
+  formatInTimeZone,
+  formatShowDate,
+  localDateIn,
+  tileParts,
+  zoneLabel,
+} from "./time";
 
 describe("formatInTimeZone", () => {
   // 10:00 AM in San Francisco on Oct 23, 2026 (daylight time, UTC-7).
@@ -73,5 +79,14 @@ describe("zoneLabel", () => {
     expect(
       zoneLabel(new Date("2026-10-23T17:00:00Z"), "America/Los_Angeles"),
     ).toBe("PT");
+  });
+});
+
+describe("localDateIn", () => {
+  it("gives the calendar date in the zone", () => {
+    // 11 PM Oct 22 in San Francisco is already Oct 23 in UTC.
+    const instant = "2026-10-23T06:00:00Z";
+    expect(localDateIn("America/Los_Angeles", instant)).toBe("2026-10-22");
+    expect(localDateIn("UTC", instant)).toBe("2026-10-23");
   });
 });

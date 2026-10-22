@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { groupDropsByShow, type DropRow } from "./group";
+import { groupDropsByShow, toOnSaleShows, type DropRow } from "./group";
 
 function row(
   id: string,
@@ -95,5 +95,29 @@ describe("groupDropsByShow", () => {
 
   it("returns nothing for no rows", () => {
     expect(groupDropsByShow([], "America/Los_Angeles")).toEqual([]);
+  });
+});
+
+describe("toOnSaleShows", () => {
+  const event = (id: string) => row("w", id, "2026-01-01T00:00:00Z").events;
+
+  it("maps shows and leaves out ones already listed as drops", () => {
+    const shows = toOnSaleShows(
+      [event("calvin"), event("olivia")],
+      "America/Los_Angeles",
+      new Set(["calvin"]),
+    );
+    expect(shows).toEqual([
+      {
+        eventId: "olivia",
+        eventName: "Show olivia",
+        eventUrl: "https://tickets.example/olivia",
+        showStartsAt: "2027-02-27T04:00:00Z",
+        showLocalDate: "2027-02-26",
+        venueName: "The Castro Theatre",
+        timeZone: "America/Los_Angeles",
+        artists: [{ id: "a1", name: "Ashe", imageUrl: "https://img/ashe" }],
+      },
+    ]);
   });
 });

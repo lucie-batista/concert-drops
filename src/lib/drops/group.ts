@@ -102,3 +102,40 @@ export function groupDropsByShow(
     a.windows[0].startsAt.localeCompare(b.windows[0].startsAt),
   );
 }
+
+/** A show that already has tickets on sale. */
+export type OnSaleShow = {
+  eventId: string;
+  eventName: string;
+  eventUrl: string | null;
+  showStartsAt: string | null;
+  showLocalDate: string | null;
+  venueName: string | null;
+  timeZone: string;
+  artists: DropArtist[];
+};
+
+/** An event row with its venue and artists, as returned by the on-sale query. */
+export type EventRow = DropRow["events"];
+
+/** Maps on-sale event rows, leaving out shows already listed under drops. */
+export function toOnSaleShows(
+  rows: EventRow[],
+  fallbackTimeZone: string,
+  excludeEventIds: Set<string>,
+): OnSaleShow[] {
+  return rows
+    .filter((e) => !excludeEventIds.has(e.id))
+    .map((e) => ({
+      eventId: e.id,
+      eventName: e.name,
+      eventUrl: e.url,
+      showStartsAt: e.starts_at,
+      showLocalDate: e.local_date,
+      venueName: e.venues?.name ?? null,
+      timeZone: e.venues?.time_zone ?? fallbackTimeZone,
+      artists: e.event_artists
+        .flatMap((ea) => (ea.artists ? [ea.artists] : []))
+        .map((a) => ({ id: a.id, name: a.name, imageUrl: a.image_url })),
+    }));
+}

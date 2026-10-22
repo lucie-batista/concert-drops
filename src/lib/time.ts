@@ -97,3 +97,14 @@ function clockTime(date: Date, timeZone: string): string {
     .format(date)
     .replace(/ /g, " ");
 }
+
+/** The calendar date ("2026-10-22") an instant falls on in a time zone. */
+export function localDateIn(timeZone: string, instant: Date | string): string {
+  // en-CA formats dates as YYYY-MM-DD.
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date(instant));
+}
