@@ -2,10 +2,13 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { chunk } from "@/lib/chunk";
 import type { Database } from "@/lib/supabase/database.types";
 
 import { combineArtistLists } from "./affinity";
 import type { SpotifyClient } from "./client";
+
+const BATCH_SIZE = 200;
 
 export class SpotifyNotConnectedError extends Error {
   constructor() {
@@ -70,32 +73,32 @@ export async function syncSpotifyArtists(
     followed,
   });
 
-  // Upsert by Spotify ID. Ticketmaster match columns aren't included, so
-  // existing matches are left alone.
-  const { data: savedArtists, error: artistsError } = await admin
-    .from("artists")
-    .upsert(
-      artists.map((a) => ({
-        spotify_id: a.spotifyId,
-        name: a.name,
-        image_url: a.imageUrl,
-        genres: a.genres,
-        updated_at: startedAt,
-      })),
-      { onConflict: "spotify_id" },
-    )
-    .select("id, spotify_id");
-  if (artistsError) throw artistsError;
-
-  const idBySpotifyId = new Map(
-    (savedArtists ?? []).map((a) => [a.spotify_id, a.id]),
-  );
+  // Upsert by Spotify ID, in batches so one large request can't fail the whole
+  // sync. Ticketmaster match columns aren't included, so existing matches stay.
+  const idBySpotifyId = new Map<string, string>();
+  for (const batch of chunk(artists, BATCH_SIZE)) {
+    const { data, error } = await admin
+      .from("artists")
+      .upsert(
+        batch.map((a) => ({
+          spotify_id: a.spotifyId,
+          name: a.name,
+          image_url: a.imageUrl,
+          genres: a.genres,
+          updated_at: startedAt,
+        })),
+        { onConflict: "spotify_id" },
+      )
+      .select("id, spotify_id");
+    if (error) throw error;
+    for (const a of data ?? []) idBySpotifyId.set(a.spotify_id, a.id);
+  }
 
   // Write the new affinity rows, then remove rows from earlier syncs. Doing it in
   // this order means readers never see an empty list mid-sync.
-  if (affinity.length > 0) {
+  for (const batch of chunk(affinity, BATCH_SIZE)) {
     const { error } = await admin.from("artist_affinity").upsert(
-      affinity.map((r) => ({
+      batch.map((r) => ({
         artist_id: idBySpotifyId.get(r.spotifyId)!,
         source: r.source,
         rank: r.rank,
