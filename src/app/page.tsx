@@ -2,14 +2,18 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 import { OnSaleCard } from "@/components/on-sale-card";
+import { SchedulePanel } from "@/components/schedule-panel";
 import { ShowCard } from "@/components/show-card";
 import { getHomeData } from "@/lib/drops/queries";
+import { getSchedule } from "@/lib/schedule/queries";
 
 import { AuthButtonPlaceholder } from "./auth-button";
 import { AuthControls } from "./auth-controls";
 
 export default async function Home({ searchParams }: PageProps<"/">) {
   const { city, drops, onSale, loadedAt } = await getHomeData();
+  const schedule = await getSchedule(city.timeZone);
+  const scheduledIds = new Set(schedule.scheduledIds);
 
   return (
     <>
@@ -55,20 +59,31 @@ export default async function Home({ searchParams }: PageProps<"/">) {
             </p>
           </div>
 
-          {drops.length > 0 ? (
-            <ol className="flex flex-col gap-3">
-              {drops.map((show) => (
-                <li key={show.eventId}>
-                  <ShowCard show={show} now={loadedAt} />
-                </li>
-              ))}
-            </ol>
-          ) : (
-            <p className="bg-surface rounded-3xl p-6 font-medium">
-              No upcoming drops right now. New presales are checked every
-              morning.
-            </p>
-          )}
+          <div className="flex flex-wrap items-start gap-6">
+            <div className="min-w-0 flex-[999_1_560px]">
+              {drops.length > 0 ? (
+                <ol className="flex flex-col gap-3">
+                  {drops.map((show) => (
+                    <li key={show.eventId}>
+                      <ShowCard
+                        show={show}
+                        now={loadedAt}
+                        scheduledIds={scheduledIds}
+                      />
+                    </li>
+                  ))}
+                </ol>
+              ) : (
+                <p className="bg-surface rounded-3xl p-6 font-medium">
+                  No upcoming drops right now. New presales are checked every
+                  morning.
+                </p>
+              )}
+            </div>
+            <div className="min-w-0 flex-[1_1_320px] lg:sticky lg:top-6">
+              <SchedulePanel items={schedule.items} />
+            </div>
+          </div>
         </section>
 
         {onSale.length > 0 && (
