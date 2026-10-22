@@ -1,8 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   cacheComponents: true,
+  // Don't generate AGENTS.md during development.
+  agentRules: false,
   partialPrefetching: true,
   turbopack: {
     rules: {
