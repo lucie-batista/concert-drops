@@ -2,6 +2,8 @@ import { connection } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
 
+import { AuthButton } from "./auth-button";
+
 const AUTH_MESSAGES: Record<string, string> = {
   error: "Login didn’t work. Please try again.",
   "not-owner": "Only the owner can log in here. Everything is still public.",
@@ -26,14 +28,19 @@ export async function AuthControls({
 
   return (
     <div className="flex flex-col items-end gap-3">
-      <form action={isOwner ? "/auth/logout" : "/auth/login"} method="post">
-        <button
-          type="submit"
-          className="border-ink min-h-11 rounded-full border-2 px-4 text-sm font-bold"
-        >
-          {isOwner ? "Log out" : "Owner login"}
-        </button>
-      </form>
+      {isOwner ? (
+        <AuthButton
+          action="/auth/logout"
+          label="Log out"
+          pendingLabel="Logging out…"
+        />
+      ) : (
+        <AuthButton
+          action="/auth/login"
+          label="Owner login"
+          pendingLabel="Connecting to Spotify…"
+        />
+      )}
       {message && (
         <p
           role="status"
