@@ -32,9 +32,9 @@ export function ShowCard({ show, now }: { show: ShowDrops; now: string }) {
             />
           )}
           <div className="min-w-0">
-            <h2 className="text-2xl leading-tight font-extrabold tracking-tight">
+            <h3 className="text-2xl leading-tight font-extrabold tracking-tight">
               {artistNames || show.eventName}
-            </h2>
+            </h3>
             <p className="text-muted font-medium">
               {[show.venueName, showDate(show, now)]
                 .filter(Boolean)
