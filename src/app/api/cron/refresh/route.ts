@@ -1,4 +1,7 @@
+import { revalidateTag } from "next/cache";
 import { NextResponse, type NextRequest } from "next/server";
+
+import { DROPS_TAG } from "@/lib/drops/queries";
 
 import { requireEnv } from "@/lib/env";
 import { isAuthorizedCronRequest } from "@/lib/refresh/cron-auth";
@@ -31,5 +34,7 @@ export async function GET(request: NextRequest) {
       apiKey: requireEnv("TICKETMASTER_API_KEY"),
     }),
   });
+  // Show the fresh data right away instead of waiting for the hourly cache.
+  revalidateTag(DROPS_TAG, "max");
   return NextResponse.json(summary);
 }
