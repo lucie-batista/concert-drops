@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatInTimeZone } from "./time";
+import { formatInTimeZone, formatShowDate, tileParts } from "./time";
 
 describe("formatInTimeZone", () => {
   // 10:00 AM in San Francisco on Oct 23, 2026 (daylight time, UTC-7).
@@ -34,5 +34,36 @@ describe("formatInTimeZone", () => {
     expect(formatInTimeZone(new Date(sfPresale), "America/Los_Angeles")).toBe(
       "Fri, Oct 23 · 10:00 AM PT",
     );
+  });
+});
+
+describe("tileParts", () => {
+  it("splits a drop time into tile pieces in the given zone", () => {
+    expect(tileParts("2026-10-23T17:00:00Z", "America/Los_Angeles")).toEqual({
+      weekday: "Fri",
+      day: "23",
+      month: "Oct",
+      time: "10:00 AM",
+      zone: "PT",
+    });
+  });
+
+  it("can land on a different day in another zone", () => {
+    // 11 PM Friday in San Francisco is already Saturday in New York.
+    expect(tileParts("2026-10-24T06:00:00Z", "America/New_York")).toMatchObject(
+      { weekday: "Sat", day: "24", time: "2:00 AM", zone: "ET" },
+    );
+  });
+});
+
+describe("formatShowDate", () => {
+  const now = new Date("2026-10-22T12:00:00Z");
+
+  it("omits the year for this year's shows", () => {
+    expect(formatShowDate("2026-11-15", now)).toBe("Sun, Nov 15");
+  });
+
+  it("includes the year for later years", () => {
+    expect(formatShowDate("2027-09-07", now)).toBe("Tue, Sep 7, 2027");
   });
 });
