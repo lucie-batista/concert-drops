@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 
+import { AuthButtonPlaceholder } from "./auth-button";
 import { AuthControls } from "./auth-controls";
 
 export default function Home({ searchParams }: PageProps<"/">) {
@@ -11,7 +12,7 @@ export default function Home({ searchParams }: PageProps<"/">) {
           concert-drops
         </div>
         {/* Depends on the visitor's cookies, so it streams in after the static page. */}
-        <Suspense>
+        <Suspense fallback={<AuthButtonPlaceholder />}>
           <AuthControls searchParams={searchParams} />
         </Suspense>
       </div>
