@@ -5,3 +5,4 @@ coverage
 package-lock.json
 next-env.d.ts
 supabase/.temp
+src/lib/supabase/database.types.ts
