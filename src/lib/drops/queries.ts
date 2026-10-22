@@ -10,6 +10,8 @@ export const DROPS_TAG = "drops";
 export type DropsPage = {
   city: { id: string; name: string; timeZone: string };
   shows: ShowDrops[];
+  /** When this data was loaded; stands in for "now" in cached rendering. */
+  loadedAt: string;
 };
 
 /**
@@ -31,8 +33,10 @@ export async function getUpcomingDrops(): Promise<DropsPage> {
   const city = settings.cities;
   if (!city) throw new Error("The current city is missing.");
 
-  // Windows that haven't started yet, or have started but not ended.
+  // A drop is a window that opens soon, or opened in the last day. Many
+  // "presales" (VIP packages, card offers) stay open for months; those aren't drops.
   const now = new Date().toISOString();
+  const recent = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
   const { data, error } = await supabase
     .from("sale_windows")
     .select(
@@ -43,7 +47,7 @@ export async function getUpcomingDrops(): Promise<DropsPage> {
     )
     .eq("events.city_id", city.id)
     .neq("events.status", "cancelled")
-    .or(`starts_at.gte."${now}",ends_at.gte."${now}"`)
+    .gte("starts_at", recent)
     .order("starts_at")
     .limit(500);
   if (error) throw error;
@@ -51,5 +55,6 @@ export async function getUpcomingDrops(): Promise<DropsPage> {
   return {
     city: { id: city.id, name: city.name, timeZone: city.time_zone },
     shows: groupDropsByShow(data as DropRow[], city.time_zone),
+    loadedAt: now,
   };
 }

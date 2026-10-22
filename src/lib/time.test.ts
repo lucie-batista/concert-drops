@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatInTimeZone, formatShowDate, tileParts } from "./time";
+import { formatInTimeZone, formatShowDate, tileParts, zoneLabel } from "./time";
 
 describe("formatInTimeZone", () => {
   // 10:00 AM in San Francisco on Oct 23, 2026 (daylight time, UTC-7).
@@ -65,5 +65,13 @@ describe("formatShowDate", () => {
 
   it("includes the year for later years", () => {
     expect(formatShowDate("2027-09-07", now)).toBe("Tue, Sep 7, 2027");
+  });
+});
+
+describe("zoneLabel", () => {
+  it("uses the short generic name", () => {
+    expect(
+      zoneLabel(new Date("2026-10-23T17:00:00Z"), "America/Los_Angeles"),
+    ).toBe("PT");
   });
 });

@@ -17,15 +17,7 @@ export function formatInTimeZone(
     day: "numeric",
   }).format(date);
 
-  const time = new Intl.DateTimeFormat("en-US", {
-    timeZone,
-    hour: "numeric",
-    minute: "2-digit",
-    timeZoneName: "shortGeneric",
-  }).format(date);
-
-  // Intl separates "10:00" and "AM" with a narrow no-break space; use a plain one.
-  return `${day} · ${time.replace(/ /g, " ")}`;
+  return `${day} · ${clockTime(date, timeZone)} ${zoneLabel(date, timeZone)}`;
 }
 
 export type TileParts = {
@@ -38,15 +30,13 @@ export type TileParts = {
 
 /** The pieces of a drop's date tile, as the instant reads in a time zone. */
 export function tileParts(instant: Date | string, timeZone: string): TileParts {
+  const date = new Date(instant);
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone,
     weekday: "short",
     month: "short",
     day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    timeZoneName: "shortGeneric",
-  }).formatToParts(new Date(instant));
+  }).formatToParts(date);
   const get = (type: Intl.DateTimeFormatPartTypes) =>
     parts.find((p) => p.type === type)?.value ?? "";
 
@@ -54,8 +44,8 @@ export function tileParts(instant: Date | string, timeZone: string): TileParts {
     weekday: get("weekday"),
     day: get("day"),
     month: get("month"),
-    time: `${get("hour")}:${get("minute")} ${get("dayPeriod")}`,
-    zone: get("timeZoneName"),
+    time: clockTime(date, timeZone),
+    zone: zoneLabel(date, timeZone),
   };
 }
 
@@ -72,4 +62,38 @@ export function formatShowDate(localDate: string, now = new Date()): string {
     day: "numeric",
     ...(date.getUTCFullYear() !== now.getUTCFullYear() && { year: "numeric" }),
   }).format(date);
+}
+
+/**
+ * A short zone name like "PT". Some browsers only have long generic names
+ * ("Los Angeles Time"), so fall back to the short specific name ("PDT").
+ */
+export function zoneLabel(date: Date, timeZone: string): string {
+  const generic = zoneName(date, timeZone, "shortGeneric");
+  return generic && !generic.includes(" ")
+    ? generic
+    : zoneName(date, timeZone, "short");
+}
+
+function zoneName(
+  date: Date,
+  timeZone: string,
+  style: "shortGeneric" | "short",
+): string {
+  return (
+    new Intl.DateTimeFormat("en-US", { timeZone, timeZoneName: style })
+      .formatToParts(date)
+      .find((p) => p.type === "timeZoneName")?.value ?? ""
+  );
+}
+
+/** "10:00 AM". Intl puts a narrow no-break space before AM/PM; use a plain one. */
+function clockTime(date: Date, timeZone: string): string {
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    hour: "numeric",
+    minute: "2-digit",
+  })
+    .format(date)
+    .replace(/ /g, " ");
 }
