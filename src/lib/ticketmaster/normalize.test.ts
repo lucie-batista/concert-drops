@@ -40,7 +40,13 @@ describe("normalizeEvent", () => {
       startsAt: "2026-10-22T03:00:00Z",
       localDate: "2026-10-21",
       timeZone: "America/Los_Angeles",
-      attractionIds: ["K8vZ917f5O0"],
+      attractions: [
+        {
+          id: "K8vZ917f5O0",
+          name: "gnash",
+          spotifyIds: ["3iri9nBFs9e4wN7PLIetAw"],
+        },
+      ],
     });
     expect(gnash.venue).toMatchObject({
       name: "Cafe Du Nord",
@@ -53,14 +59,20 @@ describe("normalizeEvent", () => {
 
   it("lists every artist on a co-headlined show", () => {
     const malcolmTodd = normalizeEvent(byId("G5vYZ_GFHHYVA"));
-    expect(malcolmTodd.attractionIds).toHaveLength(2);
+    expect(malcolmTodd.attractions.map((a) => a.name)).toEqual([
+      "Malcolm Todd",
+      "54 Ultra",
+    ]);
+    expect(
+      malcolmTodd.attractions.every((a) => a.spotifyIds.length === 0),
+    ).toBe(true);
     expect(malcolmTodd.venue?.name).toBe("Fox Theater - Oakland");
   });
 
   it("handles a cancelled show with no artists or presales", () => {
     const cancelled = normalizeEvent(byId("rZ7HnEZ1Af-3aS"));
     expect(cancelled.status).toBe("cancelled");
-    expect(cancelled.attractionIds).toEqual([]);
+    expect(cancelled.attractions).toEqual([]);
     expect(cancelled.saleWindows.every((w) => w.kind === "public")).toBe(true);
   });
 

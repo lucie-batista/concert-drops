@@ -48,7 +48,8 @@ export function normalizeArtistName(name: string): string {
     .trim();
 }
 
-function spotifyIdsOf(attraction: TmAttraction): string[] {
+/** Spotify artist IDs from an attraction's Spotify links. */
+export function spotifyIdsOf(attraction: TmAttraction): string[] {
   return (attraction.externalLinks?.spotify ?? [])
     .map((link) => /open\.spotify\.com\/artist\/([A-Za-z0-9]+)/.exec(link.url))
     .filter((m): m is RegExpExecArray => m !== null)
