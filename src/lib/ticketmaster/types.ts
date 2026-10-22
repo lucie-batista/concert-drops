@@ -58,4 +58,10 @@ export type TmAttractionsResponse = {
 
 export type TmEventsResponse = {
   _embedded?: { events?: TmEvent[] };
+  page?: {
+    size: number;
+    totalElements: number;
+    totalPages: number;
+    number: number;
+  };
 };

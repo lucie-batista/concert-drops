@@ -1,3 +1,4 @@
+import { spotifyIdsOf } from "./match";
 import type { TmEvent, TmSaleWindow, TmVenue } from "./types";
 
 export type NormalizedVenue = {
@@ -30,8 +31,14 @@ export type NormalizedEvent = {
   localDate: string | null;
   timeZone: string | null;
   venue: NormalizedVenue | null;
-  attractionIds: string[];
+  attractions: NormalizedAttraction[];
   saleWindows: NormalizedSaleWindow[];
+};
+
+export type NormalizedAttraction = {
+  id: string;
+  name: string;
+  spotifyIds: string[];
 };
 
 /** Converts Ticketmaster events into the shape we store, dropping test events. */
@@ -53,7 +60,11 @@ export function normalizeEvent(event: TmEvent): NormalizedEvent {
     localDate: start?.localDate ?? null,
     timeZone: event.dates.timezone ?? venue?.timezone ?? null,
     venue: venue ? normalizeVenue(venue) : null,
-    attractionIds: (event._embedded?.attractions ?? []).map((a) => a.id),
+    attractions: (event._embedded?.attractions ?? []).map((a) => ({
+      id: a.id,
+      name: a.name,
+      spotifyIds: spotifyIdsOf(a),
+    })),
     saleWindows: saleWindowsOf(event),
   };
 }
