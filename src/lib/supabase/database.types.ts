@@ -213,6 +213,7 @@ export type Database = {
       }
       sale_windows: {
         Row: {
+          description: string | null
           ends_at: string | null
           event_id: string
           id: string
@@ -222,6 +223,7 @@ export type Database = {
           url: string | null
         }
         Insert: {
+          description?: string | null
           ends_at?: string | null
           event_id: string
           id?: string
@@ -231,6 +233,7 @@ export type Database = {
           url?: string | null
         }
         Update: {
+          description?: string | null
           ends_at?: string | null
           event_id?: string
           id?: string
