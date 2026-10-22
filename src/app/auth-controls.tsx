@@ -1,3 +1,5 @@
+import { connection } from "next/server";
+
 import { createClient } from "@/lib/supabase/server";
 
 const AUTH_MESSAGES: Record<string, string> = {
@@ -14,6 +16,9 @@ export async function AuthControls({
   const { auth } = await searchParams;
   const message = typeof auth === "string" ? AUTH_MESSAGES[auth] : null;
 
+  // Checking the session reads the current time (token expiry), so this must
+  // render per request rather than be prerendered.
+  await connection();
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
   // Non-owners are signed out at login, so any session here is the owner's.
