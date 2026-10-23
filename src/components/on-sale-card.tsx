@@ -3,6 +3,8 @@ import Image from "next/image";
 import type { OnSaleShow } from "@/lib/drops/group";
 import { formatShowDate, tileParts } from "@/lib/time";
 
+import { MatchBadge } from "./match-badge";
+
 /**
  * A show that's already on sale. Its tile shows the concert itself, in the
  * venue's time zone, since that's when it happens wherever the viewer is.
@@ -29,9 +31,12 @@ export function OnSaleCard({ show, now }: { show: OnSaleShow; now: string }) {
         <h3 className="line-clamp-2 text-lg leading-tight font-extrabold tracking-tight break-words">
           {artistNames || show.eventName}
         </h3>
-        <p className="text-muted truncate text-sm font-medium">
-          {show.venueName}
-        </p>
+        <div className="flex min-w-0 items-center gap-2">
+          <MatchBadge score={show.score} />
+          <p className="text-muted truncate text-sm font-medium">
+            {show.venueName}
+          </p>
+        </div>
       </div>
 
       {show.eventUrl && (
