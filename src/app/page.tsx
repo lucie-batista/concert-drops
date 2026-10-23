@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 
+import { CityPicker } from "@/components/city-picker";
 import { NextDropBanner } from "@/components/next-drop-banner";
 import { OnSaleCard } from "@/components/on-sale-card";
 import { SchedulePanel } from "@/components/schedule-panel";
@@ -13,7 +14,7 @@ import { AuthButtonPlaceholder } from "./auth-button";
 import { AuthControls } from "./auth-controls";
 
 export default async function Home({ searchParams }: PageProps<"/">) {
-  const { city, drops, onSale, loadedAt } = await getHomeData();
+  const { city, recentCities, drops, onSale, loadedAt } = await getHomeData();
   const schedule = await getSchedule(city.timeZone);
   const scheduledIds = new Set(schedule.scheduledIds);
 
@@ -31,9 +32,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
             </Link>
           </nav>
           <div className="flex-1" />
-          <span className="border-ink inline-flex min-h-11 items-center rounded-full border-2 px-4 text-sm font-bold">
-            {city.name}
-          </span>
+          <CityPicker city={city} recentCities={recentCities} />
           {/* Depends on the visitor's cookies, so it streams in after the static page. */}
           <Suspense fallback={<AuthButtonPlaceholder />}>
             <AuthControls searchParams={searchParams} />
