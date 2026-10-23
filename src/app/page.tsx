@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Suspense } from "react";
 
 import { CityPicker } from "@/components/city-picker";
@@ -6,6 +5,7 @@ import { NextDropBanner } from "@/components/next-drop-banner";
 import { OnSaleCard } from "@/components/on-sale-card";
 import { SchedulePanel } from "@/components/schedule-panel";
 import { ShowCard } from "@/components/show-card";
+import { SiteHeader } from "@/components/site-header";
 import { SortableList } from "@/components/sortable-list";
 import { getHomeData } from "@/lib/drops/queries";
 import { getSchedule } from "@/lib/schedule/queries";
@@ -20,25 +20,13 @@ export default async function Home({ searchParams }: PageProps<"/">) {
 
   return (
     <>
-      <header className="border-ink border-b-2">
-        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-x-7 gap-y-3 px-6 py-5 sm:px-8">
-          <div className="flex items-center gap-2.5 text-xl font-extrabold tracking-tight">
-            <span aria-hidden="true" className="bg-presale size-7 rounded-lg" />
-            concert-drops
-          </div>
-          <nav aria-label="Main" className="flex gap-6">
-            <Link href="/" aria-current="page" className="font-bold">
-              01 Drops
-            </Link>
-          </nav>
-          <div className="flex-1" />
-          <CityPicker city={city} recentCities={recentCities} />
-          {/* Depends on the visitor's cookies, so it streams in after the static page. */}
-          <Suspense fallback={<AuthButtonPlaceholder />}>
-            <AuthControls searchParams={searchParams} />
-          </Suspense>
-        </div>
-      </header>
+      <SiteHeader current="/">
+        <CityPicker city={city} recentCities={recentCities} />
+        {/* Depends on the visitor's cookies, so it streams in after the static page. */}
+        <Suspense fallback={<AuthButtonPlaceholder />}>
+          <AuthControls searchParams={searchParams} />
+        </Suspense>
+      </SiteHeader>
 
       <main className="mx-auto flex w-full max-w-6xl flex-col gap-16 px-6 py-10 sm:px-8">
         <h1 className="sr-only">Concert drops near {city.name}</h1>

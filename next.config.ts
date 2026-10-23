@@ -6,8 +6,12 @@ const nextConfig: NextConfig = {
   agentRules: false,
   partialPrefetching: true,
   images: {
-    // Artist photos from Spotify.
-    remotePatterns: [{ protocol: "https", hostname: "i.scdn.co" }],
+    // Artist photos from Spotify and show photos from Ticketmaster.
+    remotePatterns: [
+      { protocol: "https", hostname: "i.scdn.co" },
+      { protocol: "https", hostname: "s1.ticketm.net" },
+      { protocol: "https", hostname: "i.ticketweb.com" },
+    ],
   },
   turbopack: {
     rules: {
