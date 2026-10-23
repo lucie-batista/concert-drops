@@ -148,33 +148,48 @@ export type Database = {
       events: {
         Row: {
           city_id: string
+          genre: string | null
+          has_my_artists: boolean
           id: string
+          image_url: string | null
           local_date: string | null
           name: string
+          performers: Json
           starts_at: string | null
           status: string | null
+          subgenre: string | null
           updated_at: string
           url: string | null
           venue_id: string | null
         }
         Insert: {
           city_id: string
+          genre?: string | null
+          has_my_artists?: boolean
           id: string
+          image_url?: string | null
           local_date?: string | null
           name: string
+          performers?: Json
           starts_at?: string | null
           status?: string | null
+          subgenre?: string | null
           updated_at?: string
           url?: string | null
           venue_id?: string | null
         }
         Update: {
           city_id?: string
+          genre?: string | null
+          has_my_artists?: boolean
           id?: string
+          image_url?: string | null
           local_date?: string | null
           name?: string
+          performers?: Json
           starts_at?: string | null
           status?: string | null
+          subgenre?: string | null
           updated_at?: string
           url?: string | null
           venue_id?: string | null
