@@ -61,6 +61,11 @@ export function sizeFromCapacity(capacity: number): VenueSize {
   return "big";
 }
 
+/** A venue's capacity if we know it, from its name. */
+export function knownCapacity(name: string): number | null {
+  return KNOWN_CAPACITIES[normalizeVenueName(name)] ?? null;
+}
+
 /**
  * How big a venue is: from its capacity when we know it, otherwise guessed
  * from words like "Arena" or "Club" in its name. Null when there's no clue.
@@ -71,9 +76,9 @@ export function venueSize(
 ): VenueSize | null {
   if (capacity) return sizeFromCapacity(capacity);
   if (!name) return null;
-  const key = normalizeVenueName(name);
-  const known = KNOWN_CAPACITIES[key];
+  const known = knownCapacity(name);
   if (known) return sizeFromCapacity(known);
+  const key = normalizeVenueName(name);
   if (BIG_WORDS.test(key)) return "big";
   if (SMALL_WORDS.test(key)) return "small";
   return null;
