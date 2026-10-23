@@ -7,6 +7,7 @@ import {
   QUIZ_LENGTH,
   type QuizAct,
 } from "./quiz";
+import { FAMOUS_ARTISTS } from "./famous-artists";
 import type { VibeId } from "./vibes";
 
 function actsOf(vibe: VibeId, count: number): QuizAct[] {
@@ -15,11 +16,10 @@ function actsOf(vibe: VibeId, count: number): QuizAct[] {
     name: `${vibe} act ${i}`,
     imageUrl: `https://img.example/${vibe}-${i}.jpg`,
     vibe,
-    venueName: "The Independent",
   }));
 }
 
-const cityActs = [
+const acts = [
   ...actsOf("indie", 12),
   ...actsOf("pop", 10),
   ...actsOf("hiphop", 8),
@@ -31,7 +31,7 @@ const cityActs = [
 const venues = ["Chase Center", "The Fillmore", "The Independent", "Crybaby"];
 
 describe("buildQuiz", () => {
-  const quiz = buildQuiz(cityActs, venues, "2026-10-23");
+  const quiz = buildQuiz(acts, venues, "2026-10-23");
 
   it("asks eight questions, ending with the open one", () => {
     expect(quiz).toHaveLength(QUIZ_LENGTH);
@@ -82,7 +82,7 @@ describe("buildQuiz", () => {
     ]);
   });
 
-  it("offers every vibe playing in the city at the end", () => {
+  it("offers every vibe it has acts for at the end", () => {
     const more = quiz.at(-1)!;
     expect(more.options.map((o) => o.id).sort()).toEqual(
       ["electronic", "folk", "hiphop", "indie", "jazz", "pop", "rock"].sort(),
@@ -90,12 +90,42 @@ describe("buildQuiz", () => {
   });
 
   it("is the same for the same seed and changes with it", () => {
-    expect(buildQuiz(cityActs, venues, "2026-10-23")).toEqual(quiz);
-    expect(buildQuiz(cityActs, venues, "2026-10-24")).not.toEqual(quiz);
+    expect(buildQuiz(acts, venues, "2026-10-23")).toEqual(quiz);
+    expect(buildQuiz(acts, venues, "2026-10-24")).not.toEqual(quiz);
   });
 
-  it("skips one act playing several shows", () => {
-    const repeats = [...cityActs, ...cityActs];
+  it("says when an act has a show coming up, else names their vibe", () => {
+    const touring = {
+      ...actsOf("pop", 1)[0],
+      playing: "Playing The Fillmore · Nov 12",
+    };
+    const details = buildQuiz([touring, ...actsOf("rock", 1)], venues, "x")
+      .filter((q) => q.kind === "clash")
+      .flatMap((q) => q.options.map((o) => o.detail));
+    expect(details.sort()).toEqual([
+      "Playing The Fillmore · Nov 12",
+      "Rock & metal",
+    ]);
+  });
+
+  it("builds a full quiz from the well-known artists", () => {
+    const famous = Object.entries(FAMOUS_ARTISTS).flatMap(([vibe, artists]) =>
+      artists.map((a) => ({ ...a, vibe: vibe as VibeId })),
+    );
+    for (const seed of ["2026-10-23", "2026-10-24", "2026-10-25"]) {
+      const quiz = buildQuiz(famous, venues, seed);
+      expect(quiz).toHaveLength(QUIZ_LENGTH);
+      const photos = quiz.flatMap((q) => q.options.flatMap((o) => o.images));
+      const asked = quiz
+        .filter((q) => q.kind === "playlist" || q.kind === "clash")
+        .flatMap((q) => q.options.map((o) => o.signal.vibe));
+      expect(new Set(asked).size).toBe(Object.keys(FAMOUS_ARTISTS).length);
+      expect(new Set(photos).size).toBe(photos.length);
+    }
+  });
+
+  it("skips an act listed twice", () => {
+    const repeats = [...acts, ...acts];
     const ids = buildQuiz(repeats, venues, "x")
       .filter((q) => q.kind === "clash")
       .flatMap((q) => q.options.map((o) => o.id));

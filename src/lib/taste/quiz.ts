@@ -5,16 +5,17 @@ import {
   VENUE_SIZE_LABELS,
   type VenueSize,
 } from "./venue-size";
-import { VIBES, type VibeId } from "./vibes";
+import { VIBES, vibeLabel, type VibeId } from "./vibes";
 
-/** One act playing in the city soon, as the quiz shows it. */
+/** A well-known act, as the quiz shows it. */
 export type QuizAct = {
   /** Ticketmaster attraction id. */
   id: string;
   name: string;
   imageUrl: string;
   vibe: VibeId;
-  venueName: string | null;
+  /** Their next show in the city, if they have one coming up. */
+  playing?: string;
 };
 
 /** What picking an option says about someone's taste. */
@@ -60,10 +61,10 @@ const SIZE_FALLBACKS: Record<VenueSize, string> = {
 };
 
 /**
- * Eight questions built from acts actually playing in the city, so every
- * answer points at real shows: pick a playlist, pick between two shows on the
- * same night, pick a room size, then any other styles. `seed` keeps the quiz
- * the same for everyone on a given day.
+ * Eight questions about acts most people know: pick a playlist, pick between
+ * two acts on the same night, pick a room size from the city's venues, then
+ * any other styles. The answers point at vibes, which the results match to
+ * real shows. `seed` keeps the quiz the same for everyone on a given day.
  */
 export function buildQuiz(
   acts: QuizAct[],
@@ -76,16 +77,14 @@ export function buildQuiz(
     byVibe.set(act.vibe, [...(byVibe.get(act.vibe) ?? []), act]);
   }
 
-  // Vibes with enough acts for a playlist, most common first.
-  const vibes = [...byVibe.keys()].sort(
-    (a, b) => byVibe.get(b)!.length - byVibe.get(a)!.length,
-  );
+  // Every vibe gets an equal chance at a playlist on a given day.
+  const vibes = shuffle([...byVibe.keys()], random);
   const playlistVibes = vibes.filter(
     (v) => byVibe.get(v)!.length >= PLAYLIST_SIZE,
   );
 
   const playlists: QuizQuestion[] = [];
-  const pairs = shuffle(playlistVibes.slice(0, 6), random);
+  const pairs = playlistVibes.slice(0, 6);
   for (let i = 0; i + 1 < pairs.length && playlists.length < 3; i += 2) {
     const pair = [pairs[i], pairs[i + 1]];
     playlists.push({
@@ -105,13 +104,20 @@ export function buildQuiz(
     });
   }
 
-  // Clashes pit two acts of different vibes against each other, cycling
-  // through vibes so every style gets a turn.
+  // Clashes pit two acts of different vibes against each other, starting
+  // with vibes no playlist covered so every style gets a turn.
+  const inPlaylists = new Set(
+    playlists.flatMap((q) => q.options.map((o) => o.id)),
+  );
+  const clashOrder = [
+    ...vibes.filter((v) => !inPlaylists.has(v)),
+    ...vibes.filter((v) => inPlaylists.has(v)),
+  ];
   const clashes: QuizQuestion[] = [];
   const clashCount = QUIZ_LENGTH - 2 - playlists.length;
   let cursor = 0;
   while (clashes.length < clashCount) {
-    const available = vibes.filter((v) => byVibe.get(v)!.length > 0);
+    const available = clashOrder.filter((v) => byVibe.get(v)!.length > 0);
     if (available.length < 2) break;
     const a = available[cursor % available.length];
     const b = available[(cursor + 1) % available.length];
@@ -124,7 +130,7 @@ export function buildQuiz(
       options: pair.map((act) => ({
         id: act.id,
         label: act.name,
-        detail: act.venueName ?? undefined,
+        detail: act.playing ?? vibeLabel(act.vibe),
         images: [act.imageUrl],
         signal: { vibe: act.vibe, performer: act.id },
       })),
@@ -208,7 +214,7 @@ function exampleVenue(size: VenueSize, venueNames: string[]): string | null {
   return `Like ${example.name} · about ${example.capacity.toLocaleString("en-US")} people`;
 }
 
-/** One entry per act, keeping its first show. */
+/** One entry per act. */
 function uniqueActs(acts: QuizAct[]): QuizAct[] {
   const seen = new Map<string, QuizAct>();
   for (const act of acts) if (!seen.has(act.id)) seen.set(act.id, act);

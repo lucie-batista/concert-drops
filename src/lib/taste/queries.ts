@@ -4,9 +4,10 @@ import { DROPS_TAG } from "@/lib/drops/queries";
 import { createPublicClient } from "@/lib/supabase/public";
 import { localDateIn } from "@/lib/time";
 
+import { FAMOUS_ARTISTS } from "./famous-artists";
 import { buildQuiz, type QuizAct, type QuizQuestion } from "./quiz";
 import type { CityDropRow, CityEventRow } from "./results";
-import { vibeOf } from "./vibes";
+import type { VibeId } from "./vibes";
 
 export type QuizData = {
   cityName: string;
@@ -16,9 +17,16 @@ export type QuizData = {
 /** A performer as stored in events.performers. */
 export type Performer = { id: string; name: string };
 
+/** "Nov 12", for a show's local date. */
+const SHOW_DATE = new Intl.DateTimeFormat("en-US", {
+  timeZone: "UTC",
+  month: "short",
+  day: "numeric",
+});
+
 /**
- * Today's quiz for the current city, built from every upcoming show there.
- * Refreshed with the drops.
+ * Today's quiz for the current city: well-known artists, the city's venues,
+ * and any of those artists' upcoming shows there. Refreshed with the drops.
  */
 export async function getQuizData(): Promise<QuizData> {
   "use cache";
@@ -37,7 +45,7 @@ export async function getQuizData(): Promise<QuizData> {
   const today = localDateIn(city.time_zone, new Date());
   const { data: events, error } = await supabase
     .from("events")
-    .select("genre, subgenre, image_url, performers, venues(name)")
+    .select("local_date, performers, venues(name)")
     .eq("city_id", city.id)
     .neq("status", "cancelled")
     .gte("local_date", today)
@@ -45,21 +53,26 @@ export async function getQuizData(): Promise<QuizData> {
     .limit(3000);
   if (error) throw error;
 
-  // The event photo is the headliner's, so each show offers its headliner.
-  const acts: QuizAct[] = events.flatMap((e) => {
-    const headliner = (e.performers as Performer[])[0];
-    const vibe = vibeOf(e.genre, e.subgenre);
-    if (!headliner || !vibe || !e.image_url) return [];
-    return [
-      {
-        id: headliner.id,
-        name: headliner.name,
-        imageUrl: e.image_url,
-        vibe,
-        venueName: e.venues?.name ?? null,
-      },
-    ];
-  });
+  // Note each artist's next show in town, so picking them can point at it.
+  const nextShow = new Map<string, string>();
+  for (const e of events) {
+    for (const p of e.performers as Performer[]) {
+      if (nextShow.has(p.id)) continue;
+      const date = SHOW_DATE.format(new Date(`${e.local_date}T12:00:00Z`));
+      nextShow.set(
+        p.id,
+        e.venues ? `Playing ${e.venues.name} · ${date}` : `Playing ${date}`,
+      );
+    }
+  }
+  const acts: QuizAct[] = Object.entries(FAMOUS_ARTISTS).flatMap(
+    ([vibe, artists]) =>
+      artists.map((a) => ({
+        ...a,
+        vibe: vibe as VibeId,
+        playing: nextShow.get(a.id),
+      })),
+  );
   const venueNames = [
     ...new Set(events.flatMap((e) => (e.venues ? [e.venues.name] : []))),
   ];
