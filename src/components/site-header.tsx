@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 const PAGES = [
   { href: "/", label: "01 Drops" },
   { href: "/quiz", label: "02 Try your taste" },
+  { href: "/popular", label: "03 Popular" },
 ] as const;
 
 /** The logo, page links, and whatever the page puts on the right. */

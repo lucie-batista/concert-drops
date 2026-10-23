@@ -79,7 +79,7 @@ function traitsOf(event: CityEventRow) {
 }
 
 /** The bill as card artists; the event photo belongs to the headliner. */
-function artistsOf(event: CityEventRow, score: number): DropArtist[] {
+export function artistsOf(event: CityEventRow, score: number): DropArtist[] {
   return event.performers.slice(0, MAX_NAMES).map((p, i) => ({
     id: p.id,
     name: p.name,
