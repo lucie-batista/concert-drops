@@ -8,6 +8,7 @@ import type { TmEvent } from "@/lib/ticketmaster/types";
 import {
   dropReplacedReschedules,
   matchEventsToArtists,
+  withMyArtists,
   type KnownArtist,
 } from "./match-events";
 
@@ -69,6 +70,19 @@ describe("matchEventsToArtists", () => {
   });
 });
 
+describe("withMyArtists", () => {
+  it("keeps every event, listing my artists where they play", () => {
+    const all = withMyArtists(events, [gnash]);
+    expect(all).toHaveLength(events.length);
+    expect(all.find((m) => m.event.id === gnashShow.id)?.artistIds).toEqual([
+      "artist-gnash",
+    ]);
+    expect(
+      all.find((m) => m.event.id === malcolmToddShow.id)?.artistIds,
+    ).toEqual([]);
+  });
+});
+
 describe("dropReplacedReschedules", () => {
   const original = { event: gnashShow, artistIds: ["artist-gnash"] };
   const replacement = {
@@ -90,8 +104,22 @@ describe("dropReplacedReschedules", () => {
     expect(dropReplacedReschedules([original])).toEqual([original]);
   });
 
-  it("keeps it when the other listing is a different artist", () => {
-    const otherArtist = { ...replacement, artistIds: ["artist-other"] };
+  it("drops replaced listings of acts that aren't mine too", () => {
+    const notMine = { ...original, artistIds: [] };
+    const notMineReplacement = { ...replacement, artistIds: [] };
+    expect(dropReplacedReschedules([notMine, notMineReplacement])).toEqual([
+      notMineReplacement,
+    ]);
+  });
+
+  it("keeps it when the other listing is a different act", () => {
+    const otherArtist = {
+      event: {
+        ...replacement.event,
+        attractions: [{ id: "someone-else", name: "Someone", spotifyIds: [] }],
+      },
+      artistIds: ["artist-other"],
+    };
     expect(dropReplacedReschedules([original, otherArtist])).toEqual([
       original,
       otherArtist,

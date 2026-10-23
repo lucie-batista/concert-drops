@@ -7,7 +7,7 @@ import type { TicketmasterClient } from "@/lib/ticketmaster/client";
 
 import {
   dropReplacedReschedules,
-  matchEventsToArtists,
+  withMyArtists,
   type KnownArtist,
 } from "./match-events";
 import { saveCityEvents, type SaveSummary } from "./save-events";
@@ -29,8 +29,8 @@ export type LoadCitySummary = {
 };
 
 /**
- * Sweeps a city's music events on Ticketmaster, keeps the ones with my
- * artists, saves them and records when the city was loaded.
+ * Sweeps a city's music events on Ticketmaster, finds the ones with my
+ * artists, saves them all and records when the city was loaded.
  */
 export async function loadCityEvents(deps: {
   admin: SupabaseClient<Database>;
@@ -48,13 +48,8 @@ export async function loadCityEvents(deps: {
     from: now,
     to: new Date(now.getTime() + LOOKAHEAD_DAYS * 24 * 60 * 60 * 1000),
   });
-  const matched = dropReplacedReschedules(matchEventsToArtists(swept, artists));
-  const saved = await saveCityEvents(
-    admin,
-    city.id,
-    matched,
-    now.toISOString(),
-  );
+  const events = dropReplacedReschedules(withMyArtists(swept, artists));
+  const saved = await saveCityEvents(admin, city.id, events, now.toISOString());
 
   const { error } = await admin
     .from("cities")
@@ -62,7 +57,11 @@ export async function loadCityEvents(deps: {
     .eq("id", city.id);
   if (error) throw error;
 
-  return { sweptEvents: swept.length, matchedEvents: matched.length, saved };
+  return {
+    sweptEvents: swept.length,
+    matchedEvents: events.filter((e) => e.artistIds.length > 0).length,
+    saved,
+  };
 }
 
 /** All artists, paging past Supabase's default 1,000-row limit. */
