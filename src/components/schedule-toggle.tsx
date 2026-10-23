@@ -59,7 +59,7 @@ export function ScheduleToggle({
         aria-pressed={optimistic}
         aria-label={`${optimistic ? "Remove" : "Add"} ${label} ${
           optimistic ? "from" : "to"
-        } my drop schedule`}
+        } Lucie’s drop schedule`}
         // A 44px tap target around a smaller visible box.
         className="-m-2.5 inline-flex size-11 shrink-0 items-center justify-center self-center"
       >

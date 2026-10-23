@@ -30,7 +30,7 @@ export function NextDropBanner({ items }: { items: ScheduleItem[] }) {
           id="next-drop-heading"
           className="text-ink/70 text-xs font-bold tracking-wider uppercase"
         >
-          Next drop on my schedule
+          Next drop on Lucie’s schedule
         </h2>
         <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <p

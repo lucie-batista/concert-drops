@@ -231,7 +231,7 @@ function PickMany({
         onClick={() => onDone(options.filter((o) => picked.has(o.id)))}
         className="bg-ink inline-flex min-h-12 items-center self-start rounded-full px-6 text-lg font-bold text-white disabled:opacity-60"
       >
-        {finishing ? "Finding your shows…" : "See my drops"}
+        {finishing ? "Finding your shows…" : "See your drops"}
       </button>
     </div>
   );
