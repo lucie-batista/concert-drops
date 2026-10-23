@@ -15,12 +15,25 @@ import {
 /** Cache tag for drops data; the daily refresh revalidates it. */
 export const DROPS_TAG = "drops";
 
+const CITY_FIELDS = "id, name, time_zone, geoname_id, region, country_code";
+
 const EVENT_FIELDS = `id, name, url, status, starts_at, local_date,
   venues(name, city, time_zone),
   event_artists(artists(id, name, image_url, artist_affinity(source, rank)))`;
 
+export type CityInfo = {
+  id: string;
+  name: string;
+  timeZone: string;
+  geonameId: number | null;
+  region: string | null;
+  countryCode: string | null;
+};
+
 export type HomeData = {
-  city: { id: string; name: string; timeZone: string };
+  city: CityInfo;
+  /** Cities loaded before, most recent first, for quick switching. */
+  recentCities: CityInfo[];
   /** Shows with tickets about to drop. */
   drops: ShowDrops[];
   /** Shows that already have tickets on sale. */
@@ -42,7 +55,7 @@ export async function getHomeData(): Promise<HomeData> {
 
   const { data: settings, error: settingsError } = await supabase
     .from("settings")
-    .select("cities(id, name, time_zone)")
+    .select(`cities(${CITY_FIELDS})`)
     .single();
   if (settingsError) throw settingsError;
   const city = settings.cities;
@@ -84,10 +97,38 @@ export async function getHomeData(): Promise<HomeData> {
     new Set(drops.map((d) => d.eventId)),
   );
 
+  const { data: cities, error: citiesError } = await supabase
+    .from("cities")
+    .select(CITY_FIELDS)
+    .not("refreshed_at", "is", null)
+    .neq("id", city.id)
+    .order("refreshed_at", { ascending: false })
+    .limit(8);
+  if (citiesError) throw citiesError;
+
   return {
-    city: { id: city.id, name: city.name, timeZone: city.time_zone },
+    city: toCityInfo(city),
+    recentCities: cities.map(toCityInfo),
     drops,
     onSale,
     loadedAt: now,
+  };
+}
+
+function toCityInfo(c: {
+  id: string;
+  name: string;
+  time_zone: string;
+  geoname_id: number | null;
+  region: string | null;
+  country_code: string | null;
+}): CityInfo {
+  return {
+    id: c.id,
+    name: c.name,
+    timeZone: c.time_zone,
+    geonameId: c.geoname_id,
+    region: c.region,
+    countryCode: c.country_code,
   };
 }

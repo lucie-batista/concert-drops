@@ -78,27 +78,39 @@ export type Database = {
       }
       cities: {
         Row: {
+          country_code: string | null
+          geoname_id: number | null
           id: string
           latitude: number
           longitude: number
           name: string
           radius_miles: number
+          refreshed_at: string | null
+          region: string | null
           time_zone: string
         }
         Insert: {
+          country_code?: string | null
+          geoname_id?: number | null
           id: string
           latitude: number
           longitude: number
           name: string
           radius_miles?: number
+          refreshed_at?: string | null
+          region?: string | null
           time_zone: string
         }
         Update: {
+          country_code?: string | null
+          geoname_id?: number | null
           id?: string
           latitude?: number
           longitude?: number
           name?: string
           radius_miles?: number
+          refreshed_at?: string | null
+          region?: string | null
           time_zone?: string
         }
         Relationships: []
