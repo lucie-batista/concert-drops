@@ -1,4 +1,4 @@
-import { VIBE_IDS, type VibeId } from "./vibes";
+import { VIBE_IDS, vibeLabel, type VibeId } from "./vibes";
 import type { VenueSize } from "./venue-size";
 
 /**
@@ -67,4 +67,22 @@ export function profileFromSearch(
     return null;
   }
   return { vibes, performers, size };
+}
+
+const SIZE_PHRASES: Record<VenueSize, string> = {
+  small: "in small clubs",
+  mid: "in theaters",
+  big: "in arenas",
+};
+
+/** "Indie & alternative and Pop, in small clubs" — the gist of a profile. */
+export function describeTaste(profile: TasteProfile): string {
+  const top = (Object.entries(profile.vibes) as [VibeId, number][])
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 2)
+    .map(([id]) => vibeLabel(id));
+  const size = profile.size ? SIZE_PHRASES[profile.size] : null;
+  if (top.length === 0)
+    return size ? `Live music ${size}` : "A bit of everything";
+  return [top.join(" and "), size].filter(Boolean).join(", ");
 }
