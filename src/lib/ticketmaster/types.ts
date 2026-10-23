@@ -9,6 +9,21 @@ export type TmAttraction = {
   externalLinks?: Record<string, TmExternalLink[] | undefined>;
 };
 
+export type TmImage = {
+  url: string;
+  ratio?: string;
+  width?: number;
+  height?: number;
+  /** Ticketmaster's generic placeholder, used when the act has no photo. */
+  fallback?: boolean;
+};
+
+export type TmClassification = {
+  primary?: boolean;
+  genre?: { name?: string };
+  subGenre?: { name?: string };
+};
+
 export type TmVenue = {
   id: string;
   name: string;
@@ -32,6 +47,8 @@ export type TmEvent = {
   name: string;
   url?: string;
   test?: boolean;
+  images?: TmImage[];
+  classifications?: TmClassification[];
   dates: {
     start?: {
       localDate?: string;
