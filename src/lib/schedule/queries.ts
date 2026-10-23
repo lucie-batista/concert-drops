@@ -2,7 +2,12 @@ import { cacheLife, cacheTag } from "next/cache";
 
 import { createPublicClient } from "@/lib/supabase/public";
 
-import { toScheduleItems, type ScheduleItem, type ScheduleRow } from "./map";
+import {
+  SCHEDULE_COLUMNS,
+  toScheduleItems,
+  type ScheduleItem,
+  type ScheduleRow,
+} from "./map";
 
 /** Cache tag for the schedule; ticking a drop updates it. */
 export const SCHEDULE_TAG = "schedule";
@@ -21,10 +26,7 @@ export async function getSchedule(fallbackTimeZone: string): Promise<Schedule> {
 
   const { data, error } = await createPublicClient()
     .from("schedule_items")
-    .select(
-      `sale_windows(id, kind, name, url, starts_at,
-         events(name, url, venues(name, time_zone), event_artists(artists(name))))`,
-    );
+    .select(SCHEDULE_COLUMNS);
   if (error) throw error;
 
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();

@@ -10,6 +10,10 @@ export type ScheduleItem = {
   signUpUrl: string | null;
 };
 
+/** The columns a schedule row needs, for `.from("schedule_items").select()`. */
+export const SCHEDULE_COLUMNS = `sale_windows(id, kind, name, url, starts_at,
+  events(name, url, venues(name, time_zone), event_artists(artists(name))))`;
+
 /** A schedule row with its sale window and event, as returned by the query. */
 export type ScheduleRow = {
   sale_windows: {
