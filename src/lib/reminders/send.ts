@@ -92,7 +92,7 @@ export async function sendTestReminder(options: {
     .slice(0, 3);
   if (items.length === 0) return { slot: null, sent: [] };
 
-  const { subject, html, text } = reminderEmail("evening", items, {
+  const { subject, html, text } = reminderEmail("upcoming", items, {
     timeZone,
     siteUrl,
   });

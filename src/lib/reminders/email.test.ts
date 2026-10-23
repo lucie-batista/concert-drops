@@ -31,6 +31,14 @@ describe("reminderEmail", () => {
     );
   });
 
+  it("gives the date for upcoming drops", () => {
+    const { subject, text } = reminderEmail("upcoming", [ashe], options);
+    expect(subject).toBe(
+      "Coming up: Ashe · Artist Presale on Sat, Oct 24 · 10:00 AM PT",
+    );
+    expect(text).toContain("Sat, Oct 24 · 10:00 AM PT — Ashe");
+  });
+
   it("counts several drops and gives the first time", () => {
     const later = {
       ...ashe,
