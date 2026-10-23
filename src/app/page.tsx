@@ -75,7 +75,8 @@ export default async function Home({ searchParams }: PageProps<"/">) {
                 </p>
               )}
             </div>
-            <div className="min-w-0 flex-[1_1_320px] lg:sticky lg:top-6">
+            {/* Once the panel sits beside the list (968px+), skip past the sort buttons so it lines up with the first card. */}
+            <div className="min-w-0 flex-[1_1_320px] min-[968px]:mt-16 lg:sticky lg:top-6">
               <SchedulePanel items={schedule.items} />
             </div>
           </div>
