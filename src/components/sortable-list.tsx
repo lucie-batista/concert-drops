@@ -16,6 +16,7 @@ export function SortableList({
   listClassName,
   itemClassName,
   defaultOrder = "soonest",
+  bestLabel = "Best match",
 }: {
   items: SortableItem[];
   /** What's being sorted, for screen readers, e.g. "upcoming drops". */
@@ -23,6 +24,8 @@ export function SortableList({
   listClassName?: string;
   itemClassName?: string;
   defaultOrder?: Order;
+  /** The name of the score order, e.g. "Most popular". */
+  bestLabel?: string;
 }) {
   const [order, setOrder] = useState<Order>(defaultOrder);
   const sorted =
@@ -38,7 +41,7 @@ export function SortableList({
         {(
           [
             ["soonest", "Soonest"],
-            ["best", "Best match"],
+            ["best", bestLabel],
           ] as const
         ).map(([value, text]) => (
           <button
