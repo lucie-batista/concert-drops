@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 
+import { NextDropBanner } from "@/components/next-drop-banner";
 import { OnSaleCard } from "@/components/on-sale-card";
 import { SchedulePanel } from "@/components/schedule-panel";
 import { ShowCard } from "@/components/show-card";
@@ -46,6 +47,8 @@ export default async function Home({ searchParams }: PageProps<"/">) {
           aria-labelledby="drops-heading"
           className="flex flex-col gap-8"
         >
+          <NextDropBanner items={schedule.items} />
+
           <div className="flex flex-col gap-3">
             <h2
               id="drops-heading"
