@@ -223,6 +223,32 @@ export type Database = {
         }
         Relationships: []
       }
+      reminder_sends: {
+        Row: {
+          sale_window_id: string
+          sent_at: string
+          slot: string
+        }
+        Insert: {
+          sale_window_id: string
+          sent_at?: string
+          slot: string
+        }
+        Update: {
+          sale_window_id?: string
+          sent_at?: string
+          slot?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reminder_sends_sale_window_id_fkey"
+            columns: ["sale_window_id"]
+            isOneToOne: false
+            referencedRelation: "sale_windows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sale_windows: {
         Row: {
           description: string | null
