@@ -23,8 +23,8 @@ export default async function QuizPage() {
           </h1>
           <p className="text-muted text-lg font-medium">
             The rest of this site runs on my Spotify. This demo runs on yours:
-            eight quick picks from real upcoming shows, then the ticket drops
-            that fit your taste. No login, and nothing is saved.
+            eight quick picks, then the real ticket drops near you that fit your
+            taste. No login, and nothing is saved.
           </p>
         </div>
         <QuizFlow questions={questions} />
