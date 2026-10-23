@@ -61,6 +61,8 @@ export async function getHomeData(): Promise<HomeData> {
   const city = settings.cities;
   if (!city) throw new Error("The current city is missing.");
 
+  // My page only shows events with my artists; the rest of the city is for
+  // the taste quiz.
   // A drop is a window that opens soon, or opened in the last day. Many
   // "presales" (VIP packages, card offers) stay open for months; those aren't drops.
   const now = new Date().toISOString();
@@ -72,6 +74,7 @@ export async function getHomeData(): Promise<HomeData> {
        events!inner(${EVENT_FIELDS}, city_id)`,
     )
     .eq("events.city_id", city.id)
+    .eq("events.has_my_artists", true)
     .neq("events.status", "cancelled")
     .gte("starts_at", recent)
     .order("starts_at")
@@ -85,6 +88,7 @@ export async function getHomeData(): Promise<HomeData> {
     .from("events")
     .select(EVENT_FIELDS)
     .eq("city_id", city.id)
+    .eq("has_my_artists", true)
     .in("status", ["onsale", "rescheduled"])
     .gte("local_date", localDateIn(city.time_zone, now))
     .order("local_date")

@@ -46,9 +46,25 @@ export function matchEventsToArtists(
 }
 
 /**
+ * Every event, with the ids of my artists on it (none for most of the city).
+ */
+export function withMyArtists(
+  events: NormalizedEvent[],
+  artists: KnownArtist[],
+): MatchedEvent[] {
+  const matched = new Map(
+    matchEventsToArtists(events, artists).map((m) => [m.event.id, m.artistIds]),
+  );
+  return events.map((event) => ({
+    event,
+    artistIds: matched.get(event.id) ?? [],
+  }));
+}
+
+/**
  * Ticketmaster keeps a rescheduled show's original listing alongside the new one.
  * Drops a "rescheduled" listing when another listing for the same venue, day and
- * artist exists.
+ * act exists.
  */
 export function dropReplacedReschedules(
   events: MatchedEvent[],
@@ -60,10 +76,16 @@ export function dropReplacedReschedules(
   return events.filter(
     (m) =>
       m.event.status !== "rescheduled" ||
-      !replacements.some(
-        (r) =>
-          slot(r) === slot(m) &&
-          r.artistIds.some((id) => m.artistIds.includes(id)),
-      ),
+      !replacements.some((r) => slot(r) === slot(m) && sameAct(r, m)),
+  );
+}
+
+/** Shares one of my artists, or a Ticketmaster attraction. */
+function sameAct(a: MatchedEvent, b: MatchedEvent): boolean {
+  return (
+    a.artistIds.some((id) => b.artistIds.includes(id)) ||
+    a.event.attractions.some((x) =>
+      b.event.attractions.some((y) => y.id === x.id),
+    )
   );
 }

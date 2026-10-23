@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import eventsFixture from "./__fixtures__/events-sf.json";
-import { normalizeEvent, normalizeEvents } from "./normalize";
+import { normalizeEvent, normalizeEvents, pickImage } from "./normalize";
 import type { TmEvent } from "./types";
 
 const events = eventsFixture._embedded.events as TmEvent[];
@@ -99,6 +99,59 @@ describe("normalizeEvent", () => {
       sales: { public: { startTBD: true }, presales: [{ name: "Fan Club" }] },
     };
     expect(normalizeEvent(noStart).saleWindows).toEqual([]);
+  });
+
+  it("keeps the primary genre, skipping placeholder names", () => {
+    const rock: TmEvent = {
+      ...byId("G5vYZ_A5NTXU-"),
+      classifications: [
+        { primary: false, genre: { name: "Pop" } },
+        {
+          primary: true,
+          genre: { name: "Rock" },
+          subGenre: { name: "Undefined" },
+        },
+      ],
+    };
+    expect(normalizeEvent(rock)).toMatchObject({
+      genre: "Rock",
+      subgenre: null,
+    });
+    expect(normalizeEvent(byId("G5vYZ_A5NTXU-"))).toMatchObject({
+      genre: null,
+      subgenre: null,
+      imageUrl: null,
+    });
+  });
+});
+
+describe("pickImage", () => {
+  const image = (width: number, extra = {}) => ({
+    url: `https://img.example/${width}.jpg`,
+    ratio: "16_9",
+    width,
+    ...extra,
+  });
+
+  it("picks the smallest wide photo at least 640px across", () => {
+    expect(pickImage([image(1136), image(640), image(305)])).toBe(
+      "https://img.example/640.jpg",
+    );
+  });
+
+  it("falls back to the largest when all are small", () => {
+    expect(pickImage([image(205), image(305)])).toBe(
+      "https://img.example/305.jpg",
+    );
+  });
+
+  it("ignores placeholders and other shapes", () => {
+    expect(
+      pickImage([
+        image(1024, { fallback: true }),
+        image(1024, { ratio: "3_2" }),
+      ]),
+    ).toBeNull();
   });
 });
 

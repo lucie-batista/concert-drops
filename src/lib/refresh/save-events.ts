@@ -17,18 +17,18 @@ export type SaveSummary = {
 };
 
 /**
- * Stores matched events with their venues, artists and sale windows. Venue
+ * Stores a city's events with their venues, my artists and sale windows. Venue
  * capacities (curated by hand) are never overwritten. Sale windows Ticketmaster
  * no longer lists are removed, unless they're on my schedule.
  */
 export async function saveCityEvents(
   admin: SupabaseClient<Database>,
   cityId: string,
-  matched: MatchedEvent[],
+  events: MatchedEvent[],
   seenAt: string,
 ): Promise<SaveSummary> {
   const venues = new Map(
-    matched.flatMap(({ event }) =>
+    events.flatMap(({ event }) =>
       event.venue ? [[event.venue.id, event.venue] as const] : [],
     ),
   );
@@ -49,9 +49,9 @@ export async function saveCityEvents(
     if (error) throw error;
   }
 
-  for (const batch of chunk(matched, BATCH_SIZE)) {
+  for (const batch of chunk(events, BATCH_SIZE)) {
     const { error } = await admin.from("events").upsert(
-      batch.map(({ event }) => ({
+      batch.map(({ event, artistIds }) => ({
         id: event.id,
         city_id: cityId,
         venue_id: event.venue?.id ?? null,
@@ -60,6 +60,11 @@ export async function saveCityEvents(
         local_date: event.localDate,
         url: event.url,
         status: event.status,
+        has_my_artists: artistIds.length > 0,
+        genre: event.genre,
+        subgenre: event.subgenre,
+        image_url: event.imageUrl,
+        performers: event.attractions.map((a) => ({ id: a.id, name: a.name })),
         updated_at: seenAt,
       })),
       { onConflict: "id" },
@@ -67,7 +72,7 @@ export async function saveCityEvents(
     if (error) throw error;
   }
 
-  const eventArtists = matched.flatMap(({ event, artistIds }) =>
+  const eventArtists = events.flatMap(({ event, artistIds }) =>
     artistIds.map((artistId) => ({ event_id: event.id, artist_id: artistId })),
   );
   for (const batch of chunk(eventArtists, BATCH_SIZE)) {
@@ -81,7 +86,7 @@ export async function saveCityEvents(
   // Ticketmaster occasionally lists the same window twice; one upsert can't
   // touch a row twice, so dedupe by the table's unique key first.
   const windowRows = new Map(
-    matched.flatMap(({ event }) =>
+    events.flatMap(({ event }) =>
       event.saleWindows.map((w) => [
         `${event.id}|${w.kind}|${w.name}|${w.startsAt}`,
         {
@@ -108,12 +113,12 @@ export async function saveCityEvents(
 
   const staleSaleWindowsRemoved = await removeStaleSaleWindows(
     admin,
-    matched.map(({ event }) => event.id),
+    events.map(({ event }) => event.id),
     seenWindowIds,
   );
 
   return {
-    events: matched.length,
+    events: events.length,
     venues: venues.size,
     saleWindows: windowRows.size,
     staleSaleWindowsRemoved,

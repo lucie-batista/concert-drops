@@ -1,5 +1,11 @@
 import { spotifyIdsOf } from "./match";
-import type { TmEvent, TmSaleWindow, TmVenue } from "./types";
+import type {
+  TmClassification,
+  TmEvent,
+  TmImage,
+  TmSaleWindow,
+  TmVenue,
+} from "./types";
 
 export type NormalizedVenue = {
   id: string;
@@ -30,6 +36,9 @@ export type NormalizedEvent = {
   startsAt: string | null;
   localDate: string | null;
   timeZone: string | null;
+  genre: string | null;
+  subgenre: string | null;
+  imageUrl: string | null;
   venue: NormalizedVenue | null;
   attractions: NormalizedAttraction[];
   saleWindows: NormalizedSaleWindow[];
@@ -50,6 +59,8 @@ export function normalizeEvent(event: TmEvent): NormalizedEvent {
   const start = event.dates.start;
   const timeKnown = !start?.timeTBA && !start?.noSpecificTime;
   const venue = event._embedded?.venues?.[0];
+  const classification =
+    event.classifications?.find((c) => c.primary) ?? event.classifications?.[0];
 
   return {
     id: event.id,
@@ -59,6 +70,9 @@ export function normalizeEvent(event: TmEvent): NormalizedEvent {
     startsAt: timeKnown ? (start?.dateTime ?? null) : null,
     localDate: start?.localDate ?? null,
     timeZone: event.dates.timezone ?? venue?.timezone ?? null,
+    genre: genreName(classification?.genre),
+    subgenre: genreName(classification?.subGenre),
+    imageUrl: pickImage(event.images ?? []),
     venue: venue ? normalizeVenue(venue) : null,
     attractions: (event._embedded?.attractions ?? []).map((a) => ({
       id: a.id,
@@ -113,6 +127,25 @@ function toSaleWindow(
     startsAt: sale.startDateTime,
     endsAt: sale.endDateTime ?? null,
   };
+}
+
+/** Ticketmaster's placeholder genre names mean "not known". */
+const UNKNOWN_GENRES = new Set(["Undefined", "Other", "Music"]);
+
+function genreName(genre: TmClassification["genre"]): string | null {
+  const name = genre?.name?.trim();
+  return name && !UNKNOWN_GENRES.has(name) ? name : null;
+}
+
+/**
+ * A real photo of the act, wide and about 640px across, or null when
+ * Ticketmaster only has its generic placeholder.
+ */
+export function pickImage(images: TmImage[]): string | null {
+  const photos = images.filter((i) => !i.fallback && i.ratio === "16_9");
+  const bySize = photos.sort((a, b) => (a.width ?? 0) - (b.width ?? 0));
+  const image = bySize.find((i) => (i.width ?? 0) >= 640) ?? bySize.at(-1);
+  return image?.url ?? null;
 }
 
 function toNumber(value: string | undefined): number | null {
