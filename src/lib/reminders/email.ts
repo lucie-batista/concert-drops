@@ -1,13 +1,17 @@
 import type { ScheduleItem } from "@/lib/schedule/map";
-import { tileParts } from "@/lib/time";
+import { formatInTimeZone, tileParts } from "@/lib/time";
 
 import type { Slot } from "./plan";
 
 export type ReminderEmail = { subject: string; html: string; text: string };
 
-const DAY_WORD: Record<Slot, string> = {
+/** A reminder for one day, or a sample of upcoming drops on any days. */
+export type EmailKind = Slot | "upcoming";
+
+const DAY_WORD: Record<EmailKind, string> = {
   evening: "Tomorrow",
   morning: "Today",
+  upcoming: "Coming up",
 };
 
 /**
@@ -15,22 +19,25 @@ const DAY_WORD: Record<Slot, string> = {
  * links to sign up and buy.
  */
 export function reminderEmail(
-  slot: Slot,
+  kind: EmailKind,
   items: ScheduleItem[],
   { timeZone, siteUrl }: { timeZone: string; siteUrl: string },
 ): ReminderEmail {
-  const day = DAY_WORD[slot];
+  const day = DAY_WORD[kind];
+  // Upcoming drops can be on any day, so their times include the date.
   const time = (item: ScheduleItem) => {
+    if (kind === "upcoming") return formatInTimeZone(item.startsAt, timeZone);
     const { time, zone } = tileParts(item.startsAt, timeZone);
     return `${time} ${zone}`;
   };
+  const at = kind === "upcoming" ? "on" : "at";
   const title = (item: ScheduleItem) =>
     `${item.artistNames} · ${item.windowName}`;
 
   const subject =
     items.length === 1
-      ? `${day}: ${title(items[0])} at ${time(items[0])}`
-      : `${day}: ${items.length} drops, first at ${time(items[0])}`;
+      ? `${day}: ${title(items[0])} ${at} ${time(items[0])}`
+      : `${day}: ${items.length} drops, first ${at} ${time(items[0])}`;
 
   const text = [
     `${day} on your drop schedule:`,

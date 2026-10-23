@@ -174,7 +174,7 @@ describe("sendTestReminder", () => {
 
     expect(result.sent).toEqual(["tomorrow", "next-week"]);
     expect(sent[0].subject).toBe(
-      "[Test] Tomorrow: 2 drops, first at 10:00 AM PT",
+      "[Test] Coming up: 2 drops, first on Sat, Oct 24 · 10:00 AM PT",
     );
     expect(sends.size).toBe(0);
   });
