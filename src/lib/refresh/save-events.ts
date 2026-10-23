@@ -5,6 +5,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { chunk } from "@/lib/chunk";
 import type { Database } from "@/lib/supabase/database.types";
 
+import { bestPopularRank } from "@/lib/popular/rank";
+
 import type { MatchedEvent } from "./match-events";
 
 const BATCH_SIZE = 200;
@@ -17,7 +19,7 @@ export type SaveSummary = {
 };
 
 /**
- * Stores a city's events with their venues, my artists and sale windows. Venue
+ * Stores a city's events with their venues, my artists, popularity and sale windows. Venue
  * capacities (curated by hand) are never overwritten. Sale windows Ticketmaster
  * no longer lists are removed, unless they're on my schedule.
  */
@@ -26,6 +28,8 @@ export async function saveCityEvents(
   cityId: string,
   events: MatchedEvent[],
   seenAt: string,
+  /** Popular artists by name, to rank each show. */
+  popularRanks: Map<string, number>,
 ): Promise<SaveSummary> {
   const venues = new Map(
     events.flatMap(({ event }) =>
@@ -65,6 +69,7 @@ export async function saveCityEvents(
         subgenre: event.subgenre,
         image_url: event.imageUrl,
         performers: event.attractions.map((a) => ({ id: a.id, name: a.name })),
+        popular_rank: bestPopularRank(event.attractions, popularRanks),
         updated_at: seenAt,
       })),
       { onConflict: "id" },
