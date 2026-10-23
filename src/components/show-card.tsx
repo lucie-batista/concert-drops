@@ -4,9 +4,19 @@ import type { ShowDrops } from "@/lib/drops/group";
 import { formatInTimeZone, formatShowDate } from "@/lib/time";
 
 import { DropTile, DropTime } from "./drop-time";
+import { ScheduleToggle } from "./schedule-toggle";
 
 /** One show: its next drop, the artists, and every upcoming sale window. */
-export function ShowCard({ show, now }: { show: ShowDrops; now: string }) {
+export function ShowCard({
+  show,
+  now,
+  scheduledIds,
+}: {
+  show: ShowDrops;
+  now: string;
+  /** Sale windows on my schedule. */
+  scheduledIds: Set<string>;
+}) {
   const next = show.windows[0];
   const artistNames = show.artists.map((a) => a.name).join(", ");
   const photo = show.artists.find((a) => a.imageUrl);
@@ -45,11 +55,16 @@ export function ShowCard({ show, now }: { show: ShowDrops; now: string }) {
 
         <ul className="flex flex-col gap-1.5 text-sm">
           {show.windows.map((w) => (
-            <li key={w.id} className="flex flex-wrap items-baseline gap-x-2">
-              <span
-                aria-hidden="true"
-                className={`size-2 shrink-0 self-center rounded-full ${
-                  w.kind === "presale" ? "bg-presale" : "bg-onsale"
+            <li
+              key={w.id}
+              className="flex min-h-7 flex-wrap items-baseline gap-x-2"
+            >
+              <ScheduleToggle
+                saleWindowId={w.id}
+                scheduled={scheduledIds.has(w.id)}
+                kind={w.kind}
+                label={`${artistNames || show.eventName}, ${
+                  w.kind === "public" ? "General on-sale" : w.name
                 }`}
               />
               <span className="font-bold">

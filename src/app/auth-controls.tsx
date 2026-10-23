@@ -2,6 +2,8 @@ import { connection } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
 
+import { OwnerFlag } from "@/components/owner-state";
+
 import { AuthButton } from "./auth-button";
 
 const AUTH_MESSAGES: Record<string, string> = {
@@ -28,6 +30,7 @@ export async function AuthControls({
 
   return (
     <div className="flex flex-col items-end gap-3">
+      <OwnerFlag isOwner={isOwner} />
       {isOwner ? (
         <AuthButton
           action="/auth/logout"
