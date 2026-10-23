@@ -15,8 +15,8 @@ export function ShowCard({
 }: {
   show: ShowDrops;
   now: string;
-  /** Sale windows on my schedule. */
-  scheduledIds: Set<string>;
+  /** Sale windows on my schedule; leave out to hide the schedule ticks. */
+  scheduledIds?: Set<string>;
 }) {
   const next = show.windows[0];
   const artistNames = show.artists.map((a) => a.name).join(", ");
@@ -63,14 +63,16 @@ export function ShowCard({
               key={w.id}
               className="flex min-h-7 flex-wrap items-baseline gap-x-2"
             >
-              <ScheduleToggle
-                saleWindowId={w.id}
-                scheduled={scheduledIds.has(w.id)}
-                kind={w.kind}
-                label={`${artistNames || show.eventName}, ${
-                  w.kind === "public" ? "General on-sale" : w.name
-                }`}
-              />
+              {scheduledIds && (
+                <ScheduleToggle
+                  saleWindowId={w.id}
+                  scheduled={scheduledIds.has(w.id)}
+                  kind={w.kind}
+                  label={`${artistNames || show.eventName}, ${
+                    w.kind === "public" ? "General on-sale" : w.name
+                  }`}
+                />
+              )}
               <span className="font-bold">
                 {w.kind === "public" ? "General on-sale" : w.name}
               </span>

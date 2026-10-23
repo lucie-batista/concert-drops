@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  describeTaste,
   profileFromSearch,
   profileToSearch,
   type TasteProfile,
@@ -55,5 +56,29 @@ describe("profileFromSearch", () => {
 
   it("takes the first value of repeated params", () => {
     expect(profileFromSearch({ s: ["big", "small"] })?.size).toBe("big");
+  });
+});
+
+describe("describeTaste", () => {
+  it("names the top two vibes and the room size", () => {
+    expect(
+      describeTaste({
+        vibes: { pop: 1, indie: 3, jazz: 2 },
+        performers: [],
+        size: "small",
+      }),
+    ).toBe("Indie & alternative and Jazz, soul & blues, in small clubs");
+  });
+
+  it("copes with missing answers", () => {
+    expect(
+      describeTaste({ vibes: { pop: 1 }, performers: [], size: null }),
+    ).toBe("Pop");
+    expect(describeTaste({ vibes: {}, performers: [], size: "big" })).toBe(
+      "Live music in arenas",
+    );
+    expect(describeTaste({ vibes: {}, performers: ["a"], size: null })).toBe(
+      "A bit of everything",
+    );
   });
 });
