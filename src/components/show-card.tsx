@@ -4,6 +4,7 @@ import type { ShowDrops } from "@/lib/drops/group";
 import { formatInTimeZone, formatShowDate } from "@/lib/time";
 
 import { DropTile, DropTime } from "./drop-time";
+import { MatchBadge } from "./match-badge";
 import { ScheduleToggle } from "./schedule-toggle";
 
 /** One show: its next drop, the artists, and every upcoming sale window. */
@@ -42,9 +43,12 @@ export function ShowCard({
             />
           )}
           <div className="min-w-0">
-            <h3 className="text-2xl leading-tight font-extrabold tracking-tight">
-              {artistNames || show.eventName}
-            </h3>
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              <h3 className="text-2xl leading-tight font-extrabold tracking-tight">
+                {artistNames || show.eventName}
+              </h3>
+              <MatchBadge score={show.score} />
+            </div>
             <p className="text-muted font-medium">
               {[show.venueName, showDate(show, now)]
                 .filter(Boolean)

@@ -5,6 +5,7 @@ import { NextDropBanner } from "@/components/next-drop-banner";
 import { OnSaleCard } from "@/components/on-sale-card";
 import { SchedulePanel } from "@/components/schedule-panel";
 import { ShowCard } from "@/components/show-card";
+import { SortableList } from "@/components/sortable-list";
 import { getHomeData } from "@/lib/drops/queries";
 import { getSchedule } from "@/lib/schedule/queries";
 
@@ -65,17 +66,21 @@ export default async function Home({ searchParams }: PageProps<"/">) {
           <div className="flex flex-wrap items-start gap-6">
             <div className="min-w-0 flex-[999_1_560px]">
               {drops.length > 0 ? (
-                <ol className="flex flex-col gap-3">
-                  {drops.map((show) => (
-                    <li key={show.eventId}>
+                <SortableList
+                  label="upcoming drops"
+                  listClassName="flex flex-col gap-3"
+                  items={drops.map((show) => ({
+                    key: show.eventId,
+                    score: show.score,
+                    node: (
                       <ShowCard
                         show={show}
                         now={loadedAt}
                         scheduledIds={scheduledIds}
                       />
-                    </li>
-                  ))}
-                </ol>
+                    ),
+                  }))}
+                />
               ) : (
                 <p className="bg-surface rounded-3xl p-6 font-medium">
                   No upcoming drops right now. New presales are checked every
@@ -107,14 +112,17 @@ export default async function Home({ searchParams }: PageProps<"/">) {
                 show is sold out, so check the ticket link.
               </p>
             </div>
-            <ol className="grid gap-3 md:grid-cols-2">
-              {onSale.map((show) => (
-                // min-w-0 lets the card shrink to the column so long names truncate.
-                <li key={show.eventId} className="min-w-0">
-                  <OnSaleCard show={show} now={loadedAt} />
-                </li>
-              ))}
-            </ol>
+            <SortableList
+              label="shows on sale now"
+              listClassName="grid gap-3 md:grid-cols-2"
+              // min-w-0 lets the card shrink to the column so long names truncate.
+              itemClassName="min-w-0"
+              items={onSale.map((show) => ({
+                key: show.eventId,
+                score: show.score,
+                node: <OnSaleCard show={show} now={loadedAt} />,
+              }))}
+            />
           </section>
         )}
       </main>

@@ -17,7 +17,7 @@ export const DROPS_TAG = "drops";
 
 const EVENT_FIELDS = `id, name, url, status, starts_at, local_date,
   venues(name, city, time_zone),
-  event_artists(artists(id, name, image_url))`;
+  event_artists(artists(id, name, image_url, artist_affinity(source, rank)))`;
 
 export type HomeData = {
   city: { id: string; name: string; timeZone: string };

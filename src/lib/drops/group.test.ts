@@ -29,7 +29,14 @@ function row(
         time_zone: "America/Los_Angeles",
       },
       event_artists: [
-        { artists: { id: "a1", name: "Ashe", image_url: "https://img/ashe" } },
+        {
+          artists: {
+            id: "a1",
+            name: "Ashe",
+            image_url: "https://img/ashe",
+            artist_affinity: [{ source: "followed", rank: null }],
+          },
+        },
       ],
     },
     ...overrides,
@@ -54,7 +61,10 @@ describe("groupDropsByShow", () => {
       eventName: "Show ashe",
       venueName: "The Castro Theatre",
       timeZone: "America/Los_Angeles",
-      artists: [{ id: "a1", name: "Ashe", imageUrl: "https://img/ashe" }],
+      artists: [
+        { id: "a1", name: "Ashe", imageUrl: "https://img/ashe", score: 10 },
+      ],
+      score: 10,
     });
   });
 
@@ -91,6 +101,33 @@ describe("groupDropsByShow", () => {
       "America/Los_Angeles",
     );
     expect(show.artists).toEqual([]);
+    expect(show.score).toBe(0);
+  });
+
+  it("scores a show by its best artist", () => {
+    const base = row("w", "e", "2026-10-23T17:00:00Z");
+    const artist = (id: string, rank: number) => ({
+      artists: {
+        id,
+        name: id,
+        image_url: null,
+        artist_affinity: [{ source: "top_medium_term", rank }],
+      },
+    });
+    const [show] = groupDropsByShow(
+      [
+        {
+          ...base,
+          events: {
+            ...base.events,
+            event_artists: [artist("opener", 50), artist("headliner", 1)],
+          },
+        },
+      ],
+      "America/Los_Angeles",
+    );
+    expect(show.artists.map((a) => a.score)).toEqual([1, 35]);
+    expect(show.score).toBe(35);
   });
 
   it("returns nothing for no rows", () => {
@@ -116,7 +153,10 @@ describe("toOnSaleShows", () => {
         showLocalDate: "2027-02-26",
         venueName: "The Castro Theatre",
         timeZone: "America/Los_Angeles",
-        artists: [{ id: "a1", name: "Ashe", imageUrl: "https://img/ashe" }],
+        artists: [
+          { id: "a1", name: "Ashe", imageUrl: "https://img/ashe", score: 10 },
+        ],
+        score: 10,
       },
     ]);
   });

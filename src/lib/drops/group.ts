@@ -8,7 +8,19 @@ export type DropWindow = {
   endsAt: string | null;
 };
 
-export type DropArtist = { id: string; name: string; imageUrl: string | null };
+import {
+  affinityScore,
+  showScore,
+  type AffinitySignal,
+} from "@/lib/match/score";
+
+export type DropArtist = {
+  id: string;
+  name: string;
+  imageUrl: string | null;
+  /** 0–100, see affinityScore. */
+  score: number;
+};
 
 /** One show and its upcoming ticket drops. */
 export type ShowDrops = {
@@ -22,6 +34,8 @@ export type ShowDrops = {
   venueCity: string | null;
   timeZone: string;
   artists: DropArtist[];
+  /** The best artist's score. */
+  score: number;
   /** Soonest first. */
   windows: DropWindow[];
 };
@@ -48,7 +62,12 @@ export type DropRow = {
       time_zone: string | null;
     } | null;
     event_artists: {
-      artists: { id: string; name: string; image_url: string | null } | null;
+      artists: {
+        id: string;
+        name: string;
+        image_url: string | null;
+        artist_affinity: AffinitySignal[];
+      } | null;
     }[];
   };
 };
@@ -77,9 +96,7 @@ export function groupDropsByShow(
         venueName: event.venues?.name ?? null,
         venueCity: event.venues?.city ?? null,
         timeZone: event.venues?.time_zone ?? fallbackTimeZone,
-        artists: event.event_artists
-          .flatMap((ea) => (ea.artists ? [ea.artists] : []))
-          .map((a) => ({ id: a.id, name: a.name, imageUrl: a.image_url })),
+        ...artistsOf(event),
         windows: [],
       };
       shows.set(event.id, show);
@@ -113,6 +130,8 @@ export type OnSaleShow = {
   venueName: string | null;
   timeZone: string;
   artists: DropArtist[];
+  /** The best artist's score. */
+  score: number;
 };
 
 /** An event row with its venue and artists, as returned by the on-sale query. */
@@ -134,8 +153,19 @@ export function toOnSaleShows(
       showLocalDate: e.local_date,
       venueName: e.venues?.name ?? null,
       timeZone: e.venues?.time_zone ?? fallbackTimeZone,
-      artists: e.event_artists
-        .flatMap((ea) => (ea.artists ? [ea.artists] : []))
-        .map((a) => ({ id: a.id, name: a.name, imageUrl: a.image_url })),
+      ...artistsOf(e),
     }));
+}
+
+/** The show's artists with their match scores, and the show's own score. */
+function artistsOf(event: EventRow): { artists: DropArtist[]; score: number } {
+  const artists = event.event_artists
+    .flatMap((ea) => (ea.artists ? [ea.artists] : []))
+    .map((a) => ({
+      id: a.id,
+      name: a.name,
+      imageUrl: a.image_url,
+      score: affinityScore(a.artist_affinity),
+    }));
+  return { artists, score: showScore(artists) };
 }
