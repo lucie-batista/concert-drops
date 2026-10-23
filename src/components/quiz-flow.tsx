@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { profileToSearch } from "@/lib/taste/profile";
 import {
@@ -24,6 +24,19 @@ export function QuizFlow({ questions }: { questions: QuizQuestion[] }) {
   const step = answers.length;
   const question = questions[step];
 
+  // Next.js keeps this page alive (hidden) after leaving it. A quiz left
+  // halfway keeps its answers; a finished one starts over on return.
+  const finished = useRef(false);
+  useLayoutEffect(
+    () => () => {
+      if (!finished.current) return;
+      finished.current = false;
+      setAnswers([]);
+      setFinishing(false);
+    },
+    [],
+  );
+
   // Move focus to each new question so screen readers announce it.
   const firstRender = useRef(true);
   useEffect(() => {
@@ -41,6 +54,7 @@ export function QuizFlow({ questions }: { questions: QuizQuestion[] }) {
       return;
     }
     setFinishing(true);
+    finished.current = true;
     const profile = next.reduce(applyAnswer, EMPTY_PROFILE);
     router.push(`/quiz/results?${profileToSearch(profile)}`);
   };
