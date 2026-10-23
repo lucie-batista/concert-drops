@@ -22,9 +22,9 @@ export default async function QuizPage() {
             What should you see in {cityName}?
           </h1>
           <p className="text-muted text-lg font-medium">
-            The rest of this site runs on my Spotify. This demo runs on yours:
-            eight quick picks, then the real ticket drops near you that fit your
-            taste. No login, and nothing is saved.
+            The rest of this site runs on Lucie’s Spotify. This demo runs on
+            yours: eight quick picks, then the real ticket drops near you that
+            fit your taste. No login, and nothing is saved.
           </p>
         </div>
         <QuizFlow questions={questions} />

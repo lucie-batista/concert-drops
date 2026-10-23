@@ -74,7 +74,7 @@ async function Results({
           <div className="flex flex-wrap gap-x-6 gap-y-2 font-bold">
             <RetakeLink />
             <Link href="/" className="underline underline-offset-4">
-              See my picks instead
+              See Lucie’s picks
             </Link>
           </div>
         </div>

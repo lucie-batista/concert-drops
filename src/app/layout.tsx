@@ -10,7 +10,7 @@ const interTight = Inter_Tight({
 export const metadata: Metadata = {
   title: "concert-drops",
   description:
-    "Presales and on-sales for the artists I actually listen to, ranked by how much I'd want to be there.",
+    "Upcoming presales and on-sales for the artists Lucie listens to on Spotify, best matches first.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

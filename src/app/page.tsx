@@ -45,7 +45,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
               Upcoming drops
             </h2>
             <p className="text-muted max-w-2xl text-lg font-medium">
-              Presales and on-sales for the artists I listen to, near{" "}
+              Presales and on-sales for the artists Lucie listens to, near{" "}
               {city.name}. Times are in your time zone.
             </p>
           </div>
@@ -94,7 +94,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
                 On sale now
               </h2>
               <p className="text-muted max-w-2xl font-medium">
-                {onSale.length} upcoming shows by artists I listen to that
+                {onSale.length} upcoming shows by artists Lucie listens to that
                 already have tickets out. Ticketmaster doesn’t share whether a
                 show is sold out, so check the ticket link.
               </p>

@@ -1,9 +1,11 @@
+import Link from "next/link";
+
 import type { ScheduleItem } from "@/lib/schedule/map";
 
 import { DropTime } from "./drop-time";
 import { ScheduleToggle } from "./schedule-toggle";
 
-/** My ticked drops, in date order. Visitors see it read-only. */
+/** My ticked drops, in date order. Visitors see it read-only, with a way to find their own. */
 export function SchedulePanel({ items }: { items: ScheduleItem[] }) {
   return (
     <aside
@@ -15,9 +17,9 @@ export function SchedulePanel({ items }: { items: ScheduleItem[] }) {
           id="schedule-heading"
           className="text-2xl font-extrabold tracking-tight"
         >
-          My drop schedule
+          Lucie’s schedule
         </h2>
-        <span className="text-onsale font-bold">
+        <span className="text-onsale shrink-0 font-bold">
           {items.length} {items.length === 1 ? "drop" : "drops"}
         </span>
       </div>
@@ -97,6 +99,13 @@ export function SchedulePanel({ items }: { items: ScheduleItem[] }) {
           Add all to calendar
         </a>
       )}
+
+      <Link
+        href="/quiz"
+        className="self-start text-sm font-bold text-white/75 underline underline-offset-2 hover:text-white"
+      >
+        Want your own? Take the quiz →
+      </Link>
     </aside>
   );
 }
