@@ -15,14 +15,16 @@ export function SortableList({
   label,
   listClassName,
   itemClassName,
+  defaultOrder = "soonest",
 }: {
   items: SortableItem[];
   /** What's being sorted, for screen readers, e.g. "upcoming drops". */
   label: string;
   listClassName?: string;
   itemClassName?: string;
+  defaultOrder?: Order;
 }) {
-  const [order, setOrder] = useState<Order>("soonest");
+  const [order, setOrder] = useState<Order>(defaultOrder);
   const sorted =
     order === "best" ? [...items].sort((a, b) => b.score - a.score) : items;
 
