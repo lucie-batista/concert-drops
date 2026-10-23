@@ -48,7 +48,7 @@ export function SchedulePanel({ items }: { items: ScheduleItem[] }) {
                     .filter(Boolean)
                     .join(" · ")}
                 </span>
-                <span className="flex gap-3 text-sm font-bold">
+                <span className="flex flex-wrap gap-x-3 gap-y-1 text-sm font-bold">
                   {item.signUpUrl && (
                     <a
                       href={item.signUpUrl}
@@ -69,6 +69,12 @@ export function SchedulePanel({ items }: { items: ScheduleItem[] }) {
                       Tickets ↗
                     </a>
                   )}
+                  <a
+                    href={`/calendar.ics?drop=${item.saleWindowId}`}
+                    className="underline underline-offset-2"
+                  >
+                    Add to calendar
+                  </a>
                 </span>
               </div>
               <ScheduleToggle
@@ -81,6 +87,15 @@ export function SchedulePanel({ items }: { items: ScheduleItem[] }) {
             </li>
           ))}
         </ol>
+      )}
+
+      {items.length > 1 && (
+        <a
+          href="/calendar.ics"
+          className="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-white px-4 text-sm font-bold"
+        >
+          Add all to calendar
+        </a>
       )}
     </aside>
   );
