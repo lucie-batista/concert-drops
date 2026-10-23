@@ -21,45 +21,48 @@ export function NextDropBanner({ items }: { items: ScheduleItem[] }) {
   return (
     <section
       aria-labelledby="next-drop-heading"
-      className={`flex flex-wrap items-end justify-between gap-6 rounded-3xl p-6 sm:p-8 ${
-        item.kind === "presale" ? "bg-presale" : "bg-onsale"
+      className={`flex flex-wrap items-center justify-between gap-x-6 gap-y-3 rounded-3xl px-5 py-4 sm:px-6 ${
+        item.kind === "presale" ? "bg-presale/15" : "bg-onsale/30"
       }`}
     >
-      <div className="flex min-w-0 flex-col gap-2">
+      <div className="flex min-w-0 flex-col gap-1">
         <h2
           id="next-drop-heading"
-          className="text-sm font-bold tracking-wider uppercase"
+          className="text-ink/70 text-xs font-bold tracking-wider uppercase"
         >
           Next drop on my schedule
         </h2>
-        <p
-          role="timer"
-          className="text-[clamp(2rem,11vw,4.5rem)] leading-none font-extrabold tracking-tighter tabular-nums"
-        >
-          {isOpen ? (
-            "Open now"
-          ) : (
-            <Countdown
-              msLeft={now === null ? null : Date.parse(item.startsAt) - now}
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <p
+            role="timer"
+            className="text-3xl leading-none font-extrabold tracking-tight tabular-nums"
+          >
+            {isOpen ? (
+              "Open now"
+            ) : (
+              <Countdown
+                msLeft={now === null ? null : Date.parse(item.startsAt) - now}
+              />
+            )}
+          </p>
+          <p className="text-ink/80 font-medium">
+            <span className="text-ink font-bold">{item.artistNames}</span> ·{" "}
+            {item.windowName} ·{" "}
+            <DropTime
+              startsAt={item.startsAt}
+              fallbackTimeZone={item.timeZone}
             />
-          )}
-        </p>
-        <p className="text-lg leading-snug font-medium">
-          <span className="font-extrabold">{item.artistNames}</span> ·{" "}
-          {item.windowName}
-          {item.venueName && ` · ${item.venueName}`}
-          <br />
-          <DropTime startsAt={item.startsAt} fallbackTimeZone={item.timeZone} />
-        </p>
+          </p>
+        </div>
       </div>
 
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-2">
         {item.signUpUrl && (
           <a
             href={item.signUpUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="border-ink inline-flex min-h-11 items-center rounded-full border-2 bg-white px-5 font-bold"
+            className="border-ink inline-flex min-h-11 items-center rounded-full border-2 bg-white px-4 text-sm font-bold"
           >
             Sign up ↗
           </a>
@@ -69,7 +72,7 @@ export function NextDropBanner({ items }: { items: ScheduleItem[] }) {
             href={item.ticketUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-ink inline-flex min-h-11 items-center rounded-full px-5 font-bold text-white"
+            className="bg-ink inline-flex min-h-11 items-center rounded-full px-4 text-sm font-bold text-white"
           >
             Tickets ↗
           </a>
@@ -100,7 +103,7 @@ function Countdown({ msLeft }: { msLeft: number | null }) {
             : unit === "d"
               ? value
               : String(value).padStart(2, "0")}
-          <span className="text-[0.5em]">{unit}</span>
+          <span className="text-ink/60 text-[0.6em]">{unit}</span>
         </span>
       ))
   );
