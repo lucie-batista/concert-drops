@@ -49,6 +49,22 @@ describe("searchCities", () => {
     expect(cities.map((c) => c.geonameId)).toEqual([4671654]);
   });
 
+  it("puts bigger places first", async () => {
+    const fetch = respond({
+      results: [
+        { ...austin, id: 1, name: "Melbot", population: 2000 },
+        { ...austin, id: 2, name: "Melbourne", population: 4000000 },
+        { ...austin, id: 3, name: "Melböda" },
+      ],
+    });
+    const cities = await searchCities("Melb", { fetch });
+    expect(cities.map((c) => c.name)).toEqual([
+      "Melbourne",
+      "Melbot",
+      "Melböda",
+    ]);
+  });
+
   it("handles no results", async () => {
     expect(await searchCities("zzzz", { fetch: respond({}) })).toEqual([]);
   });

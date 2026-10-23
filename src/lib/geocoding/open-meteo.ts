@@ -25,6 +25,7 @@ type Result = {
   country?: string;
   admin1?: string;
   timezone?: string;
+  population?: number;
 };
 
 /** Up to `count` towns and cities matching a name, biggest first. */
@@ -44,7 +45,9 @@ export async function searchCities(
   const res = await fetchFn(`${BASE}/search?${params}`, { signal });
   if (!res.ok) throw new Error(`City search failed (${res.status}).`);
   const body = (await res.json()) as { results?: Result[] };
-  return (body.results ?? [])
+  // Bigger places first, so Melbourne, Australia beats Melbot, Nepal.
+  return [...(body.results ?? [])]
+    .sort((a, b) => (b.population ?? 0) - (a.population ?? 0))
     .map(toCityOption)
     .filter((c): c is CityOption => c !== null)
     .slice(0, count);
