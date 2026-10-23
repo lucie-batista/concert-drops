@@ -41,6 +41,8 @@ function slug(text: string): string {
     text
       .toLowerCase()
       .normalize("NFKD")
+      // Drop accents: "é" becomes "e" plus a mark, and the mark goes.
+      .replace(/\p{M}/gu, "")
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-|-$/g, "") || "drop"
   );
