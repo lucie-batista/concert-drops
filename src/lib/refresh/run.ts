@@ -13,15 +13,8 @@ import {
 import type { Database } from "@/lib/supabase/database.types";
 import type { TicketmasterClient } from "@/lib/ticketmaster/client";
 
-import {
-  dropReplacedReschedules,
-  matchEventsToArtists,
-  type KnownArtist,
-} from "./match-events";
-import { saveCityEvents, type SaveSummary } from "./save-events";
-
-/** How far ahead to look for shows. Ticketmaster rarely lists anything further out. */
-const LOOKAHEAD_DAYS = 400;
+import { loadCityEvents } from "./load-city";
+import type { SaveSummary } from "./save-events";
 
 export type RefreshSummary = {
   city: string;
@@ -67,27 +60,15 @@ export async function runRefresh(deps: {
     }
 
     const city = await currentCity(admin);
-    const artists = await allArtists(admin);
-
-    const swept = await ticketmaster.sweepMusicEvents({
-      latitude: city.latitude,
-      longitude: city.longitude,
-      radiusMiles: city.radius_miles,
-      from: now,
-      to: new Date(now.getTime() + LOOKAHEAD_DAYS * 24 * 60 * 60 * 1000),
-    });
-    const matched = dropReplacedReschedules(
-      matchEventsToArtists(swept, artists),
-    );
-    const saved = await saveCityEvents(admin, city.id, matched, startedAt);
+    const loaded = await loadCityEvents({ admin, ticketmaster, city, now });
 
     const summary: RefreshSummary = {
       city: city.id,
       spotify: spotifySummary,
-      sweptEvents: swept.length,
+      sweptEvents: loaded.sweptEvents,
       ticketmasterRequests: ticketmaster.requestCount,
-      matchedEvents: matched.length,
-      saved,
+      matchedEvents: loaded.matchedEvents,
+      saved: loaded.saved,
       durationMs: Date.now() - now.getTime(),
     };
 
@@ -121,26 +102,6 @@ async function currentCity(admin: SupabaseClient<Database>) {
   if (error) throw error;
   if (!data.cities) throw new Error("The current city is missing.");
   return data.cities;
-}
-
-/** All artists, paging past Supabase's default 1,000-row limit. */
-async function allArtists(
-  admin: SupabaseClient<Database>,
-): Promise<KnownArtist[]> {
-  const pageSize = 1000;
-  const artists: KnownArtist[] = [];
-  for (let from = 0; ; from += pageSize) {
-    const { data, error } = await admin
-      .from("artists")
-      .select("id, spotify_id, name")
-      .order("id")
-      .range(from, from + pageSize - 1);
-    if (error) throw error;
-    artists.push(
-      ...data.map((a) => ({ id: a.id, spotifyId: a.spotify_id, name: a.name })),
-    );
-    if (data.length < pageSize) return artists;
-  }
 }
 
 function errorMessage(error: unknown): string {
