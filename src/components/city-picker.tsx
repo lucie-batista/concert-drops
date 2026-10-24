@@ -19,8 +19,8 @@ const chipClass =
   "border-ink inline-flex min-h-11 items-center rounded-full border-2 px-4 text-sm font-bold";
 
 /**
- * The city chip in the header. For the owner it opens a search for any city;
- * everyone else just sees the current city.
+ * The city in the header. For the owner it's a chip that opens a search for
+ * any city; everyone else sees a plain label.
  */
 export function CityPicker({
   city,
@@ -32,7 +32,28 @@ export function CityPicker({
   const isOwner = useIsOwner();
   const dialogRef = useRef<HTMLDialogElement>(null);
 
-  if (!isOwner) return <span className={chipClass}>{city.name}</span>;
+  // Only I can switch cities, so visitors get a plain label, not a button.
+  if (!isOwner) {
+    return (
+      <span className="text-muted inline-flex min-h-11 items-center gap-1.5 text-sm font-bold">
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z" />
+          <circle cx="12" cy="9.5" r="2.5" />
+        </svg>
+        {city.name}
+      </span>
+    );
+  }
 
   return (
     <>
