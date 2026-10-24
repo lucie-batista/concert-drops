@@ -2,6 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { loadPopularRanks } from "@/lib/popular/sync";
 import type { Database } from "@/lib/supabase/database.types";
 import type { TicketmasterClient } from "@/lib/ticketmaster/client";
 
@@ -30,7 +31,8 @@ export type LoadCitySummary = {
 
 /**
  * Sweeps a city's music events on Ticketmaster, finds the ones with my
- * artists, saves them all and records when the city was loaded.
+ * artists or popular artists, saves them all and records when the city was
+ * loaded.
  */
 export async function loadCityEvents(deps: {
   admin: SupabaseClient<Database>;
@@ -49,7 +51,13 @@ export async function loadCityEvents(deps: {
     to: new Date(now.getTime() + LOOKAHEAD_DAYS * 24 * 60 * 60 * 1000),
   });
   const events = dropReplacedReschedules(withMyArtists(swept, artists));
-  const saved = await saveCityEvents(admin, city.id, events, now.toISOString());
+  const saved = await saveCityEvents(
+    admin,
+    city.id,
+    events,
+    now.toISOString(),
+    await loadPopularRanks(admin),
+  );
 
   const { error } = await admin
     .from("cities")

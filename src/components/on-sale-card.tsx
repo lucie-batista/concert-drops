@@ -1,4 +1,5 @@
 import Image from "next/image";
+import type { ReactNode } from "react";
 
 import type { OnSaleShow } from "@/lib/drops/group";
 import { formatShowDate, tileParts } from "@/lib/time";
@@ -9,7 +10,16 @@ import { MatchBadge } from "./match-badge";
  * A show that's already on sale. Its tile shows the concert itself, in the
  * venue's time zone, since that's when it happens wherever the viewer is.
  */
-export function OnSaleCard({ show, now }: { show: OnSaleShow; now: string }) {
+export function OnSaleCard({
+  show,
+  now,
+  badge,
+}: {
+  show: OnSaleShow;
+  now: string;
+  /** Replaces the match badge. */
+  badge?: ReactNode;
+}) {
   const artistNames = show.artists.map((a) => a.name).join(", ");
   const photo = show.artists.find((a) => a.imageUrl);
 
@@ -32,7 +42,7 @@ export function OnSaleCard({ show, now }: { show: OnSaleShow; now: string }) {
           {artistNames || show.eventName}
         </h3>
         <div className="flex min-w-0 items-center gap-2">
-          <MatchBadge score={show.score} />
+          {badge ?? <MatchBadge score={show.score} />}
           <p className="text-muted truncate text-sm font-medium">
             {show.venueName}
           </p>

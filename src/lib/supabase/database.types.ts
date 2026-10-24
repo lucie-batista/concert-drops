@@ -155,6 +155,7 @@ export type Database = {
           local_date: string | null
           name: string
           performers: Json
+          popular_rank: number | null
           starts_at: string | null
           status: string | null
           subgenre: string | null
@@ -171,6 +172,7 @@ export type Database = {
           local_date?: string | null
           name: string
           performers?: Json
+          popular_rank?: number | null
           starts_at?: string | null
           status?: string | null
           subgenre?: string | null
@@ -187,6 +189,7 @@ export type Database = {
           local_date?: string | null
           name?: string
           performers?: Json
+          popular_rank?: number | null
           starts_at?: string | null
           status?: string | null
           subgenre?: string | null
@@ -210,6 +213,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      popular_artists: {
+        Row: {
+          listeners: number | null
+          name: string
+          rank: number
+          updated_at: string
+        }
+        Insert: {
+          listeners?: number | null
+          name: string
+          rank: number
+          updated_at?: string
+        }
+        Update: {
+          listeners?: number | null
+          name?: string
+          rank?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       refresh_runs: {
         Row: {

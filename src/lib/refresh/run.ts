@@ -2,6 +2,8 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import type { LastfmClient } from "@/lib/lastfm/client";
+import { syncPopularArtists } from "@/lib/popular/sync";
 import {
   SpotifyReauthRequiredError,
   type SpotifyClient,
@@ -19,6 +21,7 @@ import type { SaveSummary } from "./save-events";
 export type RefreshSummary = {
   city: string;
   spotify: SpotifySyncSummary | { error: string };
+  popular: { artists: number } | { error: string } | "skipped";
   sweptEvents: number;
   ticketmasterRequests: number;
   matchedEvents: number;
@@ -27,17 +30,20 @@ export type RefreshSummary = {
 };
 
 /**
- * The daily refresh: update my artists from Spotify, sweep the current city's
- * music events on Ticketmaster, keep the ones with my artists and save them.
+ * The daily refresh: update my artists from Spotify and the US's top artists
+ * from Last.fm, sweep the current city's music events on Ticketmaster, match
+ * them to both and save them.
  * Each run is logged in refresh_runs.
  */
 export async function runRefresh(deps: {
   admin: SupabaseClient<Database>;
   spotify: SpotifyClient;
   ticketmaster: TicketmasterClient;
+  /** Leave out to keep yesterday's popular artists. */
+  lastfm?: LastfmClient;
   now?: Date;
 }): Promise<RefreshSummary> {
-  const { admin, spotify, ticketmaster } = deps;
+  const { admin, spotify, ticketmaster, lastfm } = deps;
   const now = deps.now ?? new Date();
   const startedAt = now.toISOString();
 
@@ -59,12 +65,23 @@ export async function runRefresh(deps: {
       spotifySummary = { error: error.message };
     }
 
+    // Same for Last.fm: yesterday's popular artists are still good enough.
+    let popularSummary: RefreshSummary["popular"] = "skipped";
+    if (lastfm) {
+      try {
+        popularSummary = await syncPopularArtists(admin, lastfm, now);
+      } catch (error) {
+        popularSummary = { error: errorMessage(error) };
+      }
+    }
+
     const city = await currentCity(admin);
     const loaded = await loadCityEvents({ admin, ticketmaster, city, now });
 
     const summary: RefreshSummary = {
       city: city.id,
       spotify: spotifySummary,
+      popular: popularSummary,
       sweptEvents: loaded.sweptEvents,
       ticketmasterRequests: ticketmaster.requestCount,
       matchedEvents: loaded.matchedEvents,

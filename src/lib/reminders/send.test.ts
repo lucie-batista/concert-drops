@@ -21,6 +21,7 @@ function row(id: string, startsAt: string): ScheduleRow {
           name: "The Castro Theatre",
           time_zone: "America/Los_Angeles",
         },
+        performers: [{ id: "tm-ashe", name: "Ashe" }],
         event_artists: [{ artists: { name: "Ashe" } }],
       },
     },

@@ -17,6 +17,7 @@ function row(
       events: {
         name: "Ashe Live",
         url: "https://tickets.example/ashe",
+        performers: [{ id: "tm-ashe", name: "Ashe" }],
         venues: {
           name: "The Castro Theatre",
           time_zone: "America/Los_Angeles",
@@ -65,14 +66,43 @@ describe("toScheduleItems", () => {
     expect(toScheduleItems([{ sale_windows: null }], "UTC", since)).toEqual([]);
   });
 
-  it("falls back to the event name when no artist is linked", () => {
+  it("names the headliners of a show without my artists", () => {
     const base = row("x", "2026-10-28T17:00:00Z");
     const [item] = toScheduleItems(
       [
         {
           sale_windows: {
             ...base.sale_windows!,
-            events: { ...base.sale_windows!.events, event_artists: [] },
+            events: {
+              ...base.sale_windows!.events,
+              event_artists: [],
+              performers: [
+                { id: "a", name: "Olivia Rodrigo" },
+                { id: "b", name: "Chappell Roan" },
+                { id: "c", name: "Opener" },
+              ],
+            },
+          },
+        },
+      ],
+      "UTC",
+      since,
+    );
+    expect(item.artistNames).toBe("Olivia Rodrigo, Chappell Roan");
+  });
+
+  it("falls back to the event name when no artist is known", () => {
+    const base = row("x", "2026-10-28T17:00:00Z");
+    const [item] = toScheduleItems(
+      [
+        {
+          sale_windows: {
+            ...base.sale_windows!,
+            events: {
+              ...base.sale_windows!.events,
+              event_artists: [],
+              performers: [],
+            },
           },
         },
       ],

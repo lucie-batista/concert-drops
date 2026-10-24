@@ -1,4 +1,5 @@
 import Image from "next/image";
+import type { ReactNode } from "react";
 
 import type { ShowDrops } from "@/lib/drops/group";
 import { formatInTimeZone, formatShowDate } from "@/lib/time";
@@ -12,11 +13,14 @@ export function ShowCard({
   show,
   now,
   scheduledIds,
+  badge,
 }: {
   show: ShowDrops;
   now: string;
   /** Sale windows on my schedule; leave out to hide the schedule ticks. */
   scheduledIds?: Set<string>;
+  /** Replaces the match badge. */
+  badge?: ReactNode;
 }) {
   const next = show.windows[0];
   const artistNames = show.artists.map((a) => a.name).join(", ");
@@ -47,7 +51,7 @@ export function ShowCard({
               <h3 className="text-2xl leading-tight font-extrabold tracking-tight">
                 {artistNames || show.eventName}
               </h3>
-              <MatchBadge score={show.score} />
+              {badge ?? <MatchBadge score={show.score} />}
             </div>
             <p className="text-muted font-medium">
               {[show.venueName, showDate(show, now)]

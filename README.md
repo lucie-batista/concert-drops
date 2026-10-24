@@ -37,6 +37,8 @@ I kept missing presales for artists I really like and ending up on overpriced re
 
 **Any city.** San Francisco by default. As the owner I can search any city in the world; its shows load in under a minute and the site switches over.
 
+**Popular drops.** "03 Popular" shows upcoming drops near the city for the 1,000 most listened-to artists in the US (from [Last.fm](https://www.last.fm/charts)), whether or not I listen to them. Each card says where its biggest artist ranks ("#12 in the US"), and I can tick these drops onto my schedule too.
+
 **Taste quiz for visitors.** "02 Try your taste" asks eight quick questions about well-known artists, then shows the real upcoming drops in the city that fit the visitor's answers, using the same cards. No login, and nothing about visitors is stored.
 
 **Time zones done right.** Concert times show in the venue's time zone (a show is at 8 PM where it happens). Drop times show in the _viewer's_ time zone, because that's when they need to be at their keyboard.
@@ -50,6 +52,7 @@ Once a day a scheduled job (Vercel Cron, 13:00 UTC) rebuilds everything:
 ```mermaid
 flowchart LR
     S[Spotify<br/>my top + followed artists] --> R
+    L[Last.fm<br/>top 1,000 US artists] --> R
     T[Ticketmaster<br/>every music event<br/>within 25 miles] --> R
     R[Refresh job] --> M[Match events<br/>to my artists]
     M --> D[(Supabase<br/>Postgres)]
@@ -58,10 +61,11 @@ flowchart LR
 ```
 
 1. **Update my artists from Spotify.** My top artists over the last 4 weeks, 6 months and year (50 each) plus everyone I follow, about 725 artists. If my Spotify login has expired, the refresh carries on with the artists it already has.
-2. **Sweep the city on Ticketmaster.** Instead of searching artist by artist (725 searches a day would blow through the free API limit), it downloads _every_ music event within 25 miles for the next 400 days in a handful of requests (about 850 events for San Francisco). Ticketmaster only pages through 1,000 results per search, so big searches are split into date ranges.
-3. **Match events to my artists.** A Ticketmaster act matches one of my artists by Spotify ID when Ticketmaster links one, otherwise by exact name, but only if that name belongs to exactly one of my artists. Ambiguous names are skipped rather than guessed.
-4. **Save.** All events in the city are saved, flagged by whether they include my artists. The homepage shows only mine; the quiz searches all of them. Each event's presales and on-sales are saved as "sale windows". Rescheduled duplicates are cleaned up, and events that disappear from Ticketmaster are removed (unless I've ticked them).
-5. **Refresh the site.** The pages are cached for speed; the refresh clears that cache so new drops appear right away.
+2. **Update the popular artists from Last.fm.** The 1,000 most listened-to artists in the US. If Last.fm is down, yesterday's list is kept.
+3. **Sweep the city on Ticketmaster.** Instead of searching artist by artist (725 searches a day would blow through the free API limit), it downloads _every_ music event within 25 miles for the next 400 days in a handful of requests (about 850 events for San Francisco). Ticketmaster only pages through 1,000 results per search, so big searches are split into date ranges.
+4. **Match events to my artists.** A Ticketmaster act matches one of my artists by Spotify ID when Ticketmaster links one, otherwise by exact name, but only if that name belongs to exactly one of my artists. Ambiguous names are skipped rather than guessed. Each event also gets a popularity rank: the best Last.fm rank of anyone on the bill.
+5. **Save.** All events in the city are saved, flagged by whether they include my artists. The homepage shows only mine; the Popular page shows those with a popular artist; the quiz searches all of them. Each event's presales and on-sales are saved as "sale windows". Rescheduled duplicates are cleaned up, and events that disappear from Ticketmaster are removed (unless I've ticked them).
+6. **Refresh the site.** The pages are cached for speed; the refresh clears that cache so new drops appear right away.
 
 Each run is logged in the `refresh_runs` table with counts and timing.
 
@@ -81,6 +85,10 @@ How much I like an artist, 0–100, from my Spotify lists:
 | I follow them              | 10 points |
 
 Rank matters: #1 in a list earns its full points, #50 earns 1/50 of them. A show scores as high as its best artist. 60 or more is a **Top match**, 30 or more a **Strong match**.
+
+### Why Last.fm for "popular"
+
+Spotify no longer gives small apps artist popularity or its Top 50 charts (both come back empty), so the Popular page uses Last.fm's chart of the most listened-to artists in the US. Last.fm's listeners skew younger and more indie than Spotify's overall, so its ranking leans that way: Radiohead is #1, while country stars like Zach Bryan rank far lower than on mainstream charts.
 
 ### The taste quiz
 
@@ -119,17 +127,17 @@ The site is public: anyone can see the drops, the schedule and the quiz. Only I 
 
 ## Tech stack
 
-|                            |                                                                                                        |
-| -------------------------- | ------------------------------------------------------------------------------------------------------ |
-| Framework                  | [Next.js 16](https://nextjs.org) (App Router, Cache Components) with TypeScript                        |
-| Styling                    | [Tailwind CSS 4](https://tailwindcss.com), Inter Tight                                                 |
-| Database and auth          | [Supabase](https://supabase.com) (Postgres, row-level security, Spotify login)                         |
-| Music data                 | [Spotify Web API](https://developer.spotify.com/documentation/web-api) (top and followed artists)      |
-| Concert data               | [Ticketmaster Discovery API](https://developer.ticketmaster.com) (events, sale windows, artist photos) |
-| City search                | [Open-Meteo geocoding](https://open-meteo.com/en/docs/geocoding-api) (free, no key)                    |
-| Email                      | [Resend](https://resend.com)                                                                           |
-| Hosting and scheduled jobs | [Vercel](https://vercel.com) (Hobby plan, Vercel Cron)                                                 |
-| Tests and CI               | [Vitest](https://vitest.dev), GitHub Actions                                                           |
+|                            |                                                                                                                                                            |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Framework                  | [Next.js 16](https://nextjs.org) (App Router, Cache Components) with TypeScript                                                                            |
+| Styling                    | [Tailwind CSS 4](https://tailwindcss.com), Inter Tight                                                                                                     |
+| Database and auth          | [Supabase](https://supabase.com) (Postgres, row-level security, Spotify login)                                                                             |
+| Music data                 | [Spotify Web API](https://developer.spotify.com/documentation/web-api) (top and followed artists), [Last.fm API](https://www.last.fm/api) (top US artists) |
+| Concert data               | [Ticketmaster Discovery API](https://developer.ticketmaster.com) (events, sale windows, artist photos)                                                     |
+| City search                | [Open-Meteo geocoding](https://open-meteo.com/en/docs/geocoding-api) (free, no key)                                                                        |
+| Email                      | [Resend](https://resend.com)                                                                                                                               |
+| Hosting and scheduled jobs | [Vercel](https://vercel.com) (Hobby plan, Vercel Cron)                                                                                                     |
+| Tests and CI               | [Vitest](https://vitest.dev), GitHub Actions                                                                                                               |
 
 Everything runs on free plans with no credit card.
 
@@ -140,6 +148,7 @@ src/
   app/                    Pages and routes
     page.tsx              Homepage: drops, schedule, on sale now
     quiz/                 Taste quiz and its results page
+    popular/              Drops for the US's most popular artists
     calendar.ics/         Calendar download
     auth/                 Spotify login, callback, logout
     api/cron/refresh/     Daily refresh job
@@ -151,6 +160,8 @@ src/
     ticketmaster/         Ticketmaster client and data cleanup
     refresh/              The daily refresh: sweep, match, save
     match/                Match scores from Spotify listening
+    lastfm/               Last.fm client
+    popular/              Popular artists: sync, ranking, page data
     drops/                Group sale windows into show cards
     schedule/             The drop schedule and countdown
     calendar/             .ics file builder
@@ -168,24 +179,25 @@ supabase/migrations/      Database schema, one SQL file per change
 
 Postgres on Supabase. The schema lives in [`supabase/migrations`](supabase/migrations).
 
-| Table                 | Holds                                                                                          |
-| --------------------- | ---------------------------------------------------------------------------------------------- |
-| `cities`              | Cities the site has loaded: location, radius, time zone, last refresh                          |
-| `settings`            | The current city (one row)                                                                     |
-| `artists`             | My Spotify artists                                                                             |
-| `artist_affinity`     | Where each artist ranks in my Spotify lists, used for match scores                             |
-| `venues`              | Venues, with city and time zone                                                                |
-| `events`              | Every upcoming show in the city: date, status, genre, photo, lineup, whether it has my artists |
-| `event_artists`       | Which of my artists play which show                                                            |
-| `sale_windows`        | Each presale and on-sale: name, start and end, sign-up link                                    |
-| `schedule_items`      | The drops I've ticked                                                                          |
-| `reminder_sends`      | Which reminders have gone out, so none is sent twice                                           |
-| `spotify_credentials` | My Spotify refresh token, for the daily refresh (server only)                                  |
-| `refresh_runs`        | A log of every refresh                                                                         |
+| Table                 | Holds                                                                                                           |
+| --------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `cities`              | Cities the site has loaded: location, radius, time zone, last refresh                                           |
+| `settings`            | The current city (one row)                                                                                      |
+| `artists`             | My Spotify artists                                                                                              |
+| `artist_affinity`     | Where each artist ranks in my Spotify lists, used for match scores                                              |
+| `venues`              | Venues, with city and time zone                                                                                 |
+| `events`              | Every upcoming show in the city: date, status, genre, photo, lineup, whether it has my artists, popularity rank |
+| `event_artists`       | Which of my artists play which show                                                                             |
+| `sale_windows`        | Each presale and on-sale: name, start and end, sign-up link                                                     |
+| `popular_artists`     | The top 1,000 US artists on Last.fm, replaced daily                                                             |
+| `schedule_items`      | The drops I've ticked                                                                                           |
+| `reminder_sends`      | Which reminders have gone out, so none is sent twice                                                            |
+| `spotify_credentials` | My Spotify refresh token, for the daily refresh (server only)                                                   |
+| `refresh_runs`        | A log of every refresh                                                                                          |
 
 ## Running it yourself
 
-You'll need Node 24 (see [`.nvmrc`](.nvmrc)) and free accounts with Supabase, Spotify for Developers, Ticketmaster for Developers, Resend and Vercel.
+You'll need Node 24 (see [`.nvmrc`](.nvmrc)) and free accounts with Supabase, Spotify for Developers, Ticketmaster for Developers, Last.fm, Resend and Vercel.
 
 ### 1. Install
 
@@ -208,6 +220,7 @@ Each value is explained in [`.env.example`](.env.example):
 | `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`                       | developer.spotify.com/dashboard → your app → Settings                                           |
 | `OWNER_SPOTIFY_ID`                                                 | Your Spotify username (spotify.com/account/overview)                                            |
 | `CRON_SECRET`                                                      | Any long random string, e.g. `openssl rand -hex 32`                                             |
+| `LASTFM_API_KEY`                                                   | last.fm/api/account/create (optional; without it the Popular page stays empty)                  |
 | `RESEND_API_KEY`                                                   | resend.com → API Keys                                                                           |
 | `REMINDER_EMAIL`                                                   | Where reminders go (with Resend's test sender, this must be the email your Resend account uses) |
 
@@ -237,11 +250,11 @@ curl -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/refr
 
 Import the repo into Vercel and add the same environment variables. The scheduled jobs in [`vercel.json`](vercel.json) start automatically:
 
-| Job                   | When (UTC)      | What                           |
-| --------------------- | --------------- | ------------------------------ |
-| `/api/cron/refresh`   | 13:00 daily     | Spotify + Ticketmaster refresh |
-| `/api/cron/reminders` | 04:00 and 05:00 | 9 PM Pacific reminders         |
-| `/api/cron/reminders` | 14:00 and 15:00 | 7 AM Pacific reminders         |
+| Job                   | When (UTC)      | What                                      |
+| --------------------- | --------------- | ----------------------------------------- |
+| `/api/cron/refresh`   | 13:00 daily     | Spotify, Last.fm and Ticketmaster refresh |
+| `/api/cron/reminders` | 04:00 and 05:00 | 9 PM Pacific reminders                    |
+| `/api/cron/reminders` | 14:00 and 15:00 | 7 AM Pacific reminders                    |
 
 ## Testing and CI
 
@@ -252,7 +265,7 @@ npm run lint        # ESLint
 npm run format      # Prettier
 ```
 
-The tests cover the parts most likely to go quietly wrong: matching events to artists, scoring, grouping sale windows into cards, time zones, the countdown, calendar files, reminder timing, and the quiz. External services (Spotify, Ticketmaster, Resend, the database) are replaced with fakes so the tests run offline.
+The tests cover the parts most likely to go quietly wrong: matching events to artists, scoring, popularity ranks, grouping sale windows into cards, time zones, the countdown, calendar files, reminder timing, and the quiz. External services (Spotify, Last.fm, Ticketmaster, Resend, the database) are replaced with fakes so the tests run offline.
 
 Every pull request runs formatting, lint, type checks, tests and a production build on GitHub Actions, and Vercel builds a preview of the site.
 
